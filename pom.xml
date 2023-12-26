@@ -76,6 +76,7 @@
 	</dependencies>
 
 	<build>
+		<finalName>GallarySite</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.hibernate.orm.tooling</groupId>
