@@ -10,6 +10,9 @@
     <a href="login">login</a>
     <button>register</button>
     <button>filters</button>
+    <form th:action="@{/logout}" method="post">
+        <input type="submit" value="logout">
+    </form>
 </header>
 <div class="flex-box">
     <h1>Welcome to my gallery app</h1>

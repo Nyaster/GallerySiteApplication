@@ -13,11 +13,11 @@ import java.util.List;
 public class Tag {
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @Column(name = "name")
     private String name;
-    @ManyToMany(mappedBy = "images")
+    @ManyToMany(mappedBy = "tags")
     private List<Image> images;
 
 }
