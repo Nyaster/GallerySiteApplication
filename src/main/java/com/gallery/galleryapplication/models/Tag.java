@@ -52,4 +52,34 @@ public class Tag {
         return tags;
     }
 
+    public Tag(String val) {
+        this.name = val;
+    }
+
+    public Tag() {
+
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Tag tag = (Tag) o;
+        return Objects.equals(name, tag.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
+
+    public static List<Tag> createTagsFromList(List<String> strings){
+        List<Tag> tags = new ArrayList<>();
+        for (String val:
+             strings) {
+            tags.add(new Tag(val));
+        }
+        return tags;
+    }
+
 }
