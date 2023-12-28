@@ -8,11 +8,9 @@ import java.util.Date;
 import java.util.List;
 @Setter
 @Getter
-@Entity()
-@Table(name = "Image")
+@Entity
 public class Image {
     @Id
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @ManyToMany
@@ -22,13 +20,14 @@ public class Image {
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     private List<Tag> tags;
-    @Column(name = "media_id")
+    @Getter
     private int mediaId;
-    @Column(name = "creation_date")
+
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationDate;
-    @ManyToOne()
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "author_id", referencedColumnName = "id")
     private Author author;
+    private String pathToFileOnDisc;
 
 }

@@ -1,0 +1,19 @@
+.toolbar{
+    background: #00ADB5;
+}
+body{
+    background: #EEEEEE;
+}
+*{
+    box-sizing: border-box;
+}
+.block{
+    flex: 25%;
+    max-width: 25%;
+    margin: 25px 0 0 0;
+    border-radius: 25px;
+}
+img{
+    width: 100%;
+    height: auto;
+}

@@ -2,20 +2,65 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Lesson In love Gallare</title>
-    <link rel="stylesheet"href="css/gallery.css" >
+    <title>Lesson in love gallery</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" th:href="@{/styles/gallery.css}">
+    <link rel="stylesheet" href="gallery.css">
 </head>
 <body>
-<header class="flex-header">
-    <a href="login">login</a>
-    <button>register</button>
-    <button>filters</button>
-    <form th:action="@{/logout}" method="post">
-        <input type="submit" value="logout">
-    </form>
+<header class="nav-bg">
+    <div class="container">
+        <nav class="navbar navbar-expand-lg">
+            <div class="container-fluid">
+                <a th:if="${personDetails == null}" href="login">login</a>
+                <form th:action="@{/logout}" method="post">
+                    <input type="submit" value="logout">
+                </form>
+            </div>
+        </nav>
+    </div>
 </header>
-<div class="flex-box">
-    <h1>Welcome to my gallery app</h1>
-</div>
+
+<section class="main-text">
+    <div class="toolbar">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 col-lg-5">
+                    <form class="row" action="/" method="get">
+                        <div class="col-auto">
+                            <input class="form-control" type="text" name="tag" id="tag">
+                        </div>
+                        <div class="col-auto">
+                            <input class="btn btn-primary" type="submit" value="filter">
+                        </div>
+                    </form>
+                </div>
+                <div class="col-lg-5">
+                    <div class="input-group">
+                        <label class="input-group-text" for="inputGroupSelect01">Options</label>
+                        <select class="form-select" id="inputGroupSelect01">
+                            <option selected>Choose...</option>
+                            <option value="1">One</option>
+                            <option value="2">Two</option>
+                            <option value="3">Three</option>
+                        </select>
+                    </div>
+
+                </div>
+                <div class="col-12 col-lg-3"></div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="block" th:each="image : ${images}">
+                <a th:href="@{/image/{id}(id = ${image.getMediaId()})}">
+                    <img srcset="" th:src="@{/api/{id}(id = ${image.getMediaId()})}" src="../../../../image/18838.png/">
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
 </body>
 </html>

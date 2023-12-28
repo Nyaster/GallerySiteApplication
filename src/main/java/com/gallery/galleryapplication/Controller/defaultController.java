@@ -1,11 +1,17 @@
 package com.gallery.galleryapplication.Controller;
 
 import com.gallery.galleryapplication.models.Person;
+import com.gallery.galleryapplication.security.PersonDetails;
+import com.gallery.galleryapplication.services.ImageService;
 import com.gallery.galleryapplication.services.RegistrationService;
 import com.gallery.galleryapplication.util.PersonValidator;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -13,37 +19,21 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
 public class defaultController {
-    private final PersonValidator personValidator;
-    private final RegistrationService registrationService;
 
-    @Autowired
-    public defaultController(PersonValidator personValidator, RegistrationService registrationService) {
-        this.personValidator = personValidator;
-        this.registrationService = registrationService;
+    private final ImageService imageService;
+
+    public defaultController(ImageService imageService) {
+        this.imageService = imageService;
     }
 
     @GetMapping()
-    public String indexPage() {
+    public String indexPage(Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        PersonDetails personDetails = (PersonDetails) authentication.getPrincipal();
+        model.addAttribute("personDetails", personDetails);
+        model.addAttribute("images",imageService.getAll());
         return "index";
     }
 
-    @GetMapping("/login")
-    public String loginPage() {
-        return "auth/login";
-    }
 
-    @GetMapping("/registration")
-    public String registrationPage(@ModelAttribute("person") Person person) {
-        return "auth/registration";
-    }
-
-    @PostMapping("/registration")
-    public String performRegistration(@ModelAttribute("person") @Valid Person person, BindingResult bindingResult) {
-        personValidator.validate(person, bindingResult);
-        if (bindingResult.hasErrors()){
-            return "/auth/registration";
-        }
-        registrationService.register(person);
-        return "redirect:/login";
-    }
 }

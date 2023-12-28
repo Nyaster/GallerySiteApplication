@@ -3,21 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <link rel="stylesheet" th:href="@{/styles/gallery.css}">
 </head>
 <body>
-<h1>Please Log In</h1>
-<div th:if="${param.error}">
-    Invalid username and password.</div>
-<div th:if="${param.logout}">
-    You have been logged out.</div>
-<form th:action="@{/process_login}" method="post">
-    <div>
-        <input type="text" name="username" placeholder="Username"/>
+<div class="flex-box">
+    <div class="container">
+        <h1>Please Log In</h1>
+        <div class="error_Message" th:if="${param.error}">
+            Invalid username and password.
+        </div>
+        <div class="error_Message" th:if="${param.logout}">
+            You have been logged out.
+        </div>
+        <form th:action="@{/auth/process_login}" method="post">
+            <div>
+                <input type="text" name="username" placeholder="Username"/>
+            </div>
+            <div>
+                <input type="password" name="password" placeholder="Password"/>
+            </div>
+            <input type="submit" value="Log in"/>
+        </form>
     </div>
-    <div>
-        <input type="password" name="password" placeholder="Password"/>
-    </div>
-    <input type="submit" value="Log in" />
-</form>
+
+</div>
 </body>
 </html>
