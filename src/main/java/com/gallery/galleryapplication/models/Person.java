@@ -18,6 +18,7 @@ public class Person {
     private String password;
     @OneToOne(mappedBy = "person")
     private Author author;
+    
 
     @Override
     public boolean equals(Object o) {

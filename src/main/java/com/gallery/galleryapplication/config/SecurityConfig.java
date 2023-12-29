@@ -27,7 +27,8 @@ public class SecurityConfig {
                         .logoutUrl("/auth/logout")
                         .logoutSuccessUrl("/auth/login?logout"))
                 .authorizeHttpRequests((authz) ->
-                        authz.requestMatchers("/auth/**","/styles/**")
+                        authz.requestMatchers("/admin/**").hasRole("ADMIN")
+                                .requestMatchers("/auth/**","/styles/**")
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated()).userDetailsService(personDetailService)

@@ -13,7 +13,7 @@ public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "Image_Tag",
             joinColumns = @JoinColumn(name = "image_id"),
@@ -21,6 +21,7 @@ public class Image {
     )
     private List<Tag> tags;
     @Getter
+    @Column(unique = true)
     private int mediaId;
 
     @Temporal(TemporalType.TIMESTAMP)

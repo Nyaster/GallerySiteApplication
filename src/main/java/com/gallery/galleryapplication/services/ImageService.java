@@ -4,13 +4,15 @@ import com.gallery.galleryapplication.models.Image;
 import com.gallery.galleryapplication.models.Tag;
 import com.gallery.galleryapplication.repositories.ImageRepository;
 import com.gallery.galleryapplication.repositories.TagRepository;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,23 +24,35 @@ public class ImageService {
         this.imageRepository = imageRepository;
         this.tagRepository = tagRepository;
     }
-    public Page<Image> imageList(Integer page){
-       return imageRepository.findAll(PageRequest.of(0,10));
+
+    public Page<Image> imageList(Integer page) {
+        return imageRepository.findAll(PageRequest.of(0, 20));
     }
+
     @Transactional
     public void saveAll(List<Image> list) {
-        for (Image img : list) {
-            List<Tag> tags = img.getTags().stream().map(tag -> {
-                Tag existingTag = tagRepository.getTagByName(tag.getName());
-                return existingTag != null ? existingTag : tagRepository.save(tag);
-            }).collect(Collectors.toList());
-
-            img.setTags(tags); // Установите обновленный список тегов для изображения
-            imageRepository.save(img);
-        }
+        Set<Tag> tags = list.stream().flatMap(x -> x.getTags().stream()).collect(Collectors.toSet());
+        Set<Tag> tagsFromDb = new HashSet<>(tagRepository.findAll());
+        tags.removeAll(tagsFromDb);
+        tagRepository.saveAll(tags);
+        tagsFromDb.addAll(tags);
+        list.stream().forEach(x -> {
+            List<Tag> temp = x.getTags();
+            List<Tag> replacedTags = new ArrayList<>(tagsFromDb);
+            replacedTags.retainAll(temp);
+            x.setTags(replacedTags);
+        });
+        imageRepository.saveAll(list);
     }
-    public List<Image> getAll() {
-        return imageRepository.findAll();
+
+    public Page<Image> getAll(Pageable paging) {
+        return imageRepository.findAll(paging);
+    }
+    public Page<Image> getImagesByTags(String tags, Pageable paging){
+        tags=tags.toLowerCase();
+        List<String> temp = Arrays.stream(tags.split(",")).map(String::trim).toList();
+        List<Tag> searchTags = temp.stream().map(tagRepository::getTagByName).toList();
+        return imageRepository.findImagesByAllGivenTags(searchTags, (long) searchTags.size(),paging);
     }
 
     public Optional<Image> getByMediaId(int id) {

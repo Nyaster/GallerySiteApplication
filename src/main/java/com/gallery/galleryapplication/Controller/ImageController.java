@@ -2,6 +2,7 @@ package com.gallery.galleryapplication.Controller;
 
 import com.gallery.galleryapplication.models.Image;
 import com.gallery.galleryapplication.services.ImageService;
+import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 
 @RestController
 @RequestMapping("/api/")
@@ -35,6 +37,7 @@ public class ImageController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(bytesFile);
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).cacheControl(CacheControl.maxAge(Duration.ofMinutes(5))).body(bytesFile);
     }
+
 }

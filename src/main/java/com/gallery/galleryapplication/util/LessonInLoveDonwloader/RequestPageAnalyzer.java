@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 @PropertySource("classpath:setting.properties")
@@ -71,7 +72,7 @@ public class RequestPageAnalyzer {
 
     public void analyzeRequestPages() throws IOException {
         int pageLimit = getPageLimit();
-        pageLimit = 1;
+        pageLimit = 10;
         for (int j = 1; j <= pageLimit; j++) {
             Elements elements = getElements(j);
             List<Image> requestImageModels = null;
@@ -123,7 +124,7 @@ public class RequestPageAnalyzer {
         } catch (IOException e) {
             LoggerFactory.getLogger(this.getClass()).warn("Error while loading image", e);
         }
-        return CURRENT_DIRECTORY + File.separator + mediaId + ".png";
+        return CURRENT_DIRECTORY + File.separator +"image"+File.separator+ mediaId + ".png";
     }
 
 
@@ -156,7 +157,7 @@ public class RequestPageAnalyzer {
         image.setPathToFileOnDisc(downloadImage(imageUrl,mediaId));
         image.setMediaId(Integer.parseInt(mediaId));
         image.setCreationDate(simpleDateFormat.parse(date));
-        image.setTags(Tag.createTagsFromList(List.of(tags.split(","))));
+        image.setTags(Tag.createTagsFromList(Stream.of(tags.split(",")).map(x->x.toLowerCase().trim()).toList()));
         return image;
     }
 
@@ -189,12 +190,12 @@ public class RequestPageAnalyzer {
     }
     @PostConstruct
     public void onStartUp() {
-//        try {
-//            this.loginAndDownloadImages();
-//        } catch (RuntimeException e) {
-//            System.out.println(e.getMessage());
-//            LoggerFactory.getLogger(this.getClass())
-//                    .info("All post start up tasks done");
-//        }
+      /*  try {
+            this.loginAndDownloadImages();
+        } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
+            LoggerFactory.getLogger(this.getClass())
+                    .info("All post start up tasks done");
+        }*/
     }
 }

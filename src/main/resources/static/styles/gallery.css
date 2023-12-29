@@ -7,13 +7,22 @@ body{
 *{
     box-sizing: border-box;
 }
+.block .inner-block{
+    aspect-ratio: 16/9;
+}
 .block{
     flex: 25%;
     max-width: 25%;
     margin: 25px 0 0 0;
     border-radius: 25px;
+    aspect-ratio: 16/9;
+    text-align: center;
+}
+.inner-block{
+    position: relative;
 }
 img{
-    width: 100%;
-    height: auto;
+    width: auto;
+    height: 100%;
 }
+.nav-item{}

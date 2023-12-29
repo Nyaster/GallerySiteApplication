@@ -9,14 +9,21 @@
     <link rel="stylesheet" href="gallery.css">
 </head>
 <body>
-<header class="nav-bg">
+<header class="bg-dark">
     <div class="container">
-        <nav class="navbar navbar-expand-lg">
-            <div class="container-fluid">
-                <a th:if="${personDetails == null}" href="login">login</a>
-                <form th:action="@{/logout}" method="post">
-                    <input type="submit" value="logout">
-                </form>
+        <nav class="navbar navbar-expand-lg justify-content-end" >
+            <div class="container-fluid justify-content-end">
+                <ul class="navbar-nav nav ">
+                    <li class="nav-item">
+                        <a th:if="${personDetails == null}" href="login">login</a>
+                    </li>
+                    <li class="nav-item">
+                        <form th:action="@{/auth/logout}" method="post">
+                            <input type="submit" value="logout">
+                        </form>
+                    </li>
+                </ul>
+
             </div>
         </nav>
     </div>
@@ -29,7 +36,7 @@
                 <div class="col-12 col-lg-5">
                     <form class="row" action="/" method="get">
                         <div class="col-auto">
-                            <input class="form-control" type="text" name="tag" id="tag">
+                            <input class="form-control" type="text" name="keyword" id="keyword" th:value="${keyword}">
                         </div>
                         <div class="col-auto">
                             <input class="btn btn-primary" type="submit" value="filter">
@@ -40,8 +47,7 @@
                     <div class="input-group">
                         <label class="input-group-text" for="inputGroupSelect01">Options</label>
                         <select class="form-select" id="inputGroupSelect01">
-                            <option selected>Choose...</option>
-                            <option value="1">One</option>
+                            <option selected value="1">One</option>
                             <option value="2">Two</option>
                             <option value="3">Three</option>
                         </select>
@@ -54,10 +60,44 @@
     </div>
     <div class="container">
         <div class="row">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-auto">
+                        <nav aria-label="Pagination" th:if="${totalPages > 0}">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                                    <a th:replace="~{fragments/paging :: paging(1, '<<', 'First Page')}"></a>
+                                </li>
+                                <li class="page-item font-weight-bold" th:classappend="${currentPage == 1} ? 'disabled'">
+                                    <a th:replace="~{fragments/paging :: paging(${currentPage - 1}, 'Prev', 'Previous Page')}"></a>
+                                </li>
+                                <li class="page-item disabled" th:if="${currentPage - 2 > 1}">
+                                    <a class="page-link" href="#">...</a>
+                                </li>
+                                <li class="page-item" th:classappend="${page == currentPage} ? 'active'"
+                                    th:each="page : ${#numbers.sequence((currentPage > 2 ? currentPage - 2 : 1) , (currentPage + 2 < totalPages ? currentPage + 2 : totalPages))}">
+                                    <a th:replace="~{fragments/paging :: paging(${page}, ${page}, 'Page ' + ${page})}"></a>
+                                </li>
+                                <li class="page-item disabled" th:if="${currentPage + 2 < totalPages}">
+                                    <a class="page-link" href="#">...</a>
+                                </li>
+                                <li class="page-item font-weight-bold" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                                    <a th:replace="~{fragments/paging :: paging(${currentPage + 1},'Next', 'Next Page')}"></a>
+                                </li>
+                                <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                                    <a th:replace="~{fragments/paging :: paging(${totalPages}, '>>', 'Last Page')}"></a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
             <div class="block" th:each="image : ${images}">
-                <a th:href="@{/image/{id}(id = ${image.getMediaId()})}">
-                    <img srcset="" th:src="@{/api/{id}(id = ${image.getMediaId()})}" src="../../../../image/18838.png/">
-                </a>
+                <div class="inner-block">
+                    <a th:href="@{/api/{id}(id = ${image.getMediaId()})}">
+                        <img srcset="" th:src="@{/api/{id}(id = ${image.getMediaId()})}" src="../../../../image/18838.png/">
+                    </a>
+                </div>
             </div>
         </div>
     </div>
