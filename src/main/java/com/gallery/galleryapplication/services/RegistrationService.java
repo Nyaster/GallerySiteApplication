@@ -1,5 +1,6 @@
 package com.gallery.galleryapplication.services;
 
+import com.gallery.galleryapplication.models.EnumRoles;
 import com.gallery.galleryapplication.models.Person;
 import com.gallery.galleryapplication.repositories.PersonRepository;
 import jakarta.transaction.Transactional;
@@ -20,6 +21,7 @@ public class RegistrationService {
     @Transactional
     public void register(Person person){
         person.setPassword(passwordEncoder.encode(person.getPassword()));
+        person.setRole(EnumRoles.ROLE_USER);
         personRepository.save(person);
     }
 }

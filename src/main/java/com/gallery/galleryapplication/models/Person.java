@@ -18,7 +18,8 @@ public class Person {
     private String password;
     @OneToOne(mappedBy = "person")
     private Author author;
-    
+    @Enumerated(EnumType.STRING)
+    private EnumRoles role;
 
     @Override
     public boolean equals(Object o) {

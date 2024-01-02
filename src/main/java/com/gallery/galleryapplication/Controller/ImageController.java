@@ -5,12 +5,8 @@ import com.gallery.galleryapplication.services.ImageService;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,12 +22,21 @@ public class ImageController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<byte[]> getImage(@PathVariable int id){
-        Image image =  imageService.getByMediaId(id).orElse(null);
-        if (image == null){
-            return ResponseEntity.badRequest().contentType(MediaType.IMAGE_PNG).body(null);
+    public ResponseEntity<byte[]> getImage(@PathVariable int id, @RequestParam(required = false) Integer width, @RequestParam(required = false) Integer height) {
+
+        Image image = imageService.getByMediaId(id).orElse(null);
+        if (image == null) {
+            return ResponseEntity.badRequest().body(null);
         }
         byte[] bytesFile;
+        if (width != null && height != null && height > 0 && width > 0) {
+            try {
+                bytesFile = Files.readAllBytes(Path.of(image.getPathToImageThumbnailOnDisc()));
+                return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).cacheControl(CacheControl.maxAge(Duration.ofMinutes(5))).body(bytesFile);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
         try {
             bytesFile = Files.readAllBytes(Path.of(image.getPathToFileOnDisc()));
         } catch (IOException e) {

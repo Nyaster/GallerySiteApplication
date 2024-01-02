@@ -2,7 +2,6 @@ package com.gallery.galleryapplication.util.LessonInLoveDonwloader;
 
 import com.gallery.galleryapplication.models.Image;
 import com.gallery.galleryapplication.models.Tag;
-import com.gallery.galleryapplication.services.ImageService;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import org.htmlunit.WebClient;
@@ -15,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -44,11 +42,9 @@ public class RequestPageAnalyzer {
     String requestLink;
     List<Image> images;
     List<List<String>> bannedTags;
-    ImageService imageService;
     @Autowired
-    public RequestPageAnalyzer(WebsiteLoginService loginService, ImageService imageService) {
+    public RequestPageAnalyzer(WebsiteLoginService loginService) {
         this.loginService = loginService;
-        this.imageService = imageService;
         images = new ArrayList<>();
         bannedTags = new ArrayList<>();
         bannedTags.add(Arrays.stream("loli,nsfw".split(",")).toList());
@@ -72,7 +68,6 @@ public class RequestPageAnalyzer {
 
     public void analyzeRequestPages() throws IOException {
         int pageLimit = getPageLimit();
-        pageLimit = 10;
         for (int j = 1; j <= pageLimit; j++) {
             Elements elements = getElements(j);
             List<Image> requestImageModels = null;
@@ -83,8 +78,6 @@ public class RequestPageAnalyzer {
             }
             images.addAll(requestImageModels);
         }
-        imageService.saveAll(images.stream().distinct().toList());
-
 
     }
 
@@ -162,7 +155,7 @@ public class RequestPageAnalyzer {
     }
 
 
-    public void loginAndDownloadImages() {
+    public List<Image> loginAndDownloadImages() {
         String currentDirectory = System.getProperty("user.dir");
         File folder = new File(currentDirectory + File.separator + "image");
         if (!folder.exists()) {
@@ -186,7 +179,7 @@ public class RequestPageAnalyzer {
         } catch (IOException e) {
             LoggerFactory.getLogger(this.getClass()).error("Error to logging errorInAnalyze" + e.getMessage());
         }
-        images = images.stream().distinct().collect(Collectors.toList());
+       return images = images.stream().distinct().collect(Collectors.toList());
     }
     @PostConstruct
     public void onStartUp() {

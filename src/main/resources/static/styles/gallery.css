@@ -1,28 +1,29 @@
-.toolbar{
-    background: #00ADB5;
-}
-body{
-    background: #EEEEEE;
-}
-*{
-    box-sizing: border-box;
-}
-.block .inner-block{
-    aspect-ratio: 16/9;
-}
-.block{
-    flex: 25%;
+.card-sizing{
     max-width: 25%;
-    margin: 25px 0 0 0;
-    border-radius: 25px;
+    padding: calc(var(--bs-gutter-x) * .2)
+}
+
+.image-box{
     aspect-ratio: 16/9;
-    text-align: center;
 }
-.inner-block{
-    position: relative;
+.hover-text-card{
+    display: none;
 }
-img{
-    width: auto;
-    height: 100%;
+.card>a:hover>.hover-text-card{
+    display: block;
+    background-color: rgba(4,4,19,0.7);
 }
-.nav-item{}
+.pagination-ul{
+    margin-top: .5rem;
+    margin-bottom:.5rem;
+}
+@media (max-width: 767px){
+    .card-sizing{
+        max-width: 50%;
+    }
+    .pagination-sm{
+        --bs-pagination-padding-x: 0.35rem;
+        --bs-pagination-padding-y: 0.25rem;
+        flex-wrap: wrap;
+    }
+}

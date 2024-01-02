@@ -13,7 +13,7 @@ public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(
             name = "Image_Tag",
             joinColumns = @JoinColumn(name = "image_id"),
@@ -30,5 +30,8 @@ public class Image {
     @JoinColumn(name = "author_id", referencedColumnName = "id")
     private Author author;
     private String pathToFileOnDisc;
+    private String pathToImageThumbnailOnDisc;
+    @Transient
+    private String tagsInString;
 
 }
