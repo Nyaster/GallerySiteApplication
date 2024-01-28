@@ -7,6 +7,8 @@ import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactor
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -29,13 +31,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         //.requiresChannel(x->x.anyRequest().requiresSecure()) добавить что бы редирект
-        http.portMapper(x->x.http(8080).mapsTo(8443)).formLogin(form->form.loginPage("/auth/login").loginProcessingUrl("/auth/process_login")
+        http.portMapper(x->x.http(80).mapsTo(443)).requiresChannel(x->x.anyRequest().requiresSecure()).formLogin(form->form.loginPage("/auth/login").loginProcessingUrl("/auth/process_login")
                         .defaultSuccessUrl("/").failureUrl("/auth/login?error"))
                 .logout(logout->logout
                         .logoutUrl("/auth/logout")
                         .logoutSuccessUrl("/auth/login?logout"))
                 .authorizeHttpRequests((authz) ->
                         authz.requestMatchers("/admin/**","auth/registration/**").hasRole("ADMIN")
+                                .requestMatchers("api/*/*/edit").hasRole("EDITOR")
                                 .requestMatchers("/auth/**","/styles/**").permitAll()
                                 .anyRequest().authenticated())
                 .rememberMe(x->x.userDetailsService(personDetailService)).userDetailsService(personDetailService)
@@ -46,6 +49,14 @@ public class SecurityConfig {
     PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
+    @Bean
+    static RoleHierarchy roleHierarchy() {
+        RoleHierarchyImpl hierarchy = new RoleHierarchyImpl();
+        hierarchy.setHierarchy("ROLE_ADMIN > ROLE_EDITOR\n" +
+                "ROLE_EDITOR > ROLE_USER\n");
+        return hierarchy;
+    }
+
     @Bean
     public WebServerFactoryCustomizer<TomcatServletWebServerFactory> cookieProcessorCustomizer() {
         return (TomcatServletWebServerFactory factory) -> {

@@ -17,4 +17,6 @@ public class Author {
     private Person person;
     @OneToMany(mappedBy = "author")
     private List<Image> images;
+    @OneToMany(mappedBy = "author")
+    private List<FanArtImage> fanImages;
 }

@@ -1,5 +1,6 @@
 package com.gallery.galleryapplication.util.LessonInLoveDonwloader;
 
+import com.gallery.galleryapplication.models.FanArtImage;
 import com.gallery.galleryapplication.models.Image;
 import com.gallery.galleryapplication.models.Tag;
 import jakarta.annotation.PostConstruct;
@@ -42,6 +43,7 @@ public class RequestPageAnalyzer {
     String requestLink;
     List<Image> images;
     List<List<String>> bannedTags;
+
     @Autowired
     public RequestPageAnalyzer(WebsiteLoginService loginService) {
         this.loginService = loginService;
@@ -107,7 +109,7 @@ public class RequestPageAnalyzer {
             WebClient webClient = loginService.getWebClient();
             String url = "https://lessonsinlovegame.com" + urlE;
             try (InputStream in = webClient.getPage(url).getWebResponse().getContentAsStream();
-                 FileOutputStream fos = new FileOutputStream(CURRENT_DIRECTORY + File.separator +"image"+File.separator+ mediaId + ".png")) {
+                 FileOutputStream fos = new FileOutputStream(CURRENT_DIRECTORY + File.separator + "image" + File.separator + mediaId + ".png")) {
                 int len;
                 byte[] buffer = new byte[4096]; // Experiment with different buffer sizes
                 while ((len = in.read(buffer)) != -1) {
@@ -117,7 +119,7 @@ public class RequestPageAnalyzer {
         } catch (IOException e) {
             LoggerFactory.getLogger(this.getClass()).warn("Error while loading image", e);
         }
-        return CURRENT_DIRECTORY + File.separator +"image"+File.separator+ mediaId + ".png";
+        return CURRENT_DIRECTORY + File.separator + "image" + File.separator + mediaId + ".png";
     }
 
 
@@ -147,10 +149,10 @@ public class RequestPageAnalyzer {
         String author = element.child(2).ownText();
         String likesString = element.child(3).child(1).ownText();
         int likes = Integer.parseInt(likesString);
-        image.setPathToFileOnDisc(downloadImage(imageUrl,mediaId));
+        image.setPathToFileOnDisc(downloadImage(imageUrl, mediaId));
         image.setMediaId(Integer.parseInt(mediaId));
         image.setCreationDate(simpleDateFormat.parse(date));
-        image.setTags(Tag.createTagsFromList(Stream.of(tags.split(",")).map(x->x.toLowerCase().trim()).toList()));
+        image.setTags(Tag.createTagsFromList(Stream.of(tags.split(",")).map(x -> x.toLowerCase().trim()).toList()));
         return image;
     }
 
@@ -179,8 +181,9 @@ public class RequestPageAnalyzer {
         } catch (IOException e) {
             LoggerFactory.getLogger(this.getClass()).error("Error to logging errorInAnalyze" + e.getMessage());
         }
-       return images = images.stream().distinct().collect(Collectors.toList());
+        return images = images.stream().distinct().collect(Collectors.toList());
     }
+
     @PostConstruct
     public void onStartUp() {
       /*  try {
@@ -190,5 +193,47 @@ public class RequestPageAnalyzer {
             LoggerFactory.getLogger(this.getClass())
                     .info("All post start up tasks done");
         }*/
+    }
+
+    public List<Image> checkUpdates(List<Image> allImages) throws IOException {
+        List<Image> globalNewImages = new ArrayList<>();
+        if (loginService.getLoginStatus()) {
+            try {
+                loginService.loginToWebsite();
+            } catch (IOException e) {
+                LoggerFactory.getLogger(this.getClass()).error("Error while loging to site" + e.getMessage());
+            }
+        }
+        int pageLimit = getPageLimit();
+        for (int i = 0; i <= pageLimit; i++) {
+            Elements elements = getElements(i);
+            List<Image> newImages = new ArrayList<>();
+            try {
+                newImages = elementsImageParser(elements);
+            } catch (ParseException e) {
+                LoggerFactory.getLogger(this.getClass()).error("Something gonna wrong");
+            }
+            if(allImages.stream().filter(newImages::contains).findAny().isEmpty()) {
+                globalNewImages.addAll(newImages);
+            }else {
+                globalNewImages.addAll(newImages);
+                break;
+            }
+        }
+        return globalNewImages;
+    }
+
+    public List<FanArtImage> scanImagesFromFolder() {
+        File imageFolder = new File(CURRENT_DIRECTORY + File.separator + "imageFanArts");
+        List<FanArtImage> fanArtImages = new ArrayList<>();
+        if (imageFolder.exists() && imageFolder.isDirectory()){
+            List<File> images = Arrays.stream(imageFolder.listFiles()).toList();
+             fanArtImages = images.parallelStream().map(x-> {
+                FanArtImage fanArtImage = new FanArtImage();
+                fanArtImage.setPathToFileOnDisc(x.getPath());
+                return fanArtImage;
+            }).toList();
+        }
+        return fanArtImages;
     }
 }

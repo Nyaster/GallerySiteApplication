@@ -19,6 +19,8 @@ public class Tag {
     private String name;
     @ManyToMany(mappedBy = "tags", cascade = CascadeType.ALL)
     private List<Image> images;
+    @ManyToMany(mappedBy = "tags", cascade = CascadeType.ALL)
+    private List<FanArtImage> fanArtImages;
 
     public Tag(String val) {
         this.name = val;
@@ -33,7 +35,7 @@ public class Tag {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Tag tag = (Tag) o;
-        return Objects.equals(name, tag.name);
+        return name.equalsIgnoreCase(tag.name);
     }
 
     @Override

@@ -16,7 +16,7 @@
 
 <section class="main-text">
     <div class="container ">
-        <form th:action="${currentPageUrl}" method="get">
+        <form action="/" method="get">
             <div class="row justify-content-center">
                 <div class="col-auto col-sm-13">
                     <input name="keyword" id="keyword" class="form-control" autocomplete="off"
@@ -38,28 +38,28 @@
                         <nav aria-label="Pagination" th:if="${totalPages > 0}">
                             <ul class="pagination pagination-sm pagination-ul justify-content-center">
                                 <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
-                                    <a th:replace="~{fragments/paging :: paging(1, '<<', 'First Page',${currentPageUrl})}"></a>
+                                    <a th:replace="~{fragments/paging :: paging(1, '<<', 'First Page')}"></a>
                                 </li>
                                 <li class="page-item font-weight-bold"
                                     th:classappend="${currentPage == 1} ? 'disabled'">
-                                    <a th:replace="~{fragments/paging :: paging(${currentPage - 1}, 'Prev', 'Previous Page',${currentPageUrl})}"></a>
+                                    <a th:replace="~{fragments/paging :: paging(${currentPage - 1}, 'Prev', 'Previous Page')}"></a>
                                 </li>
                                 <li class="page-item disabled" th:if="${currentPage - 2 > 1}">
                                     <a class="page-link" href="#">...</a>
                                 </li>
                                 <li class="page-item" th:classappend="${page == currentPage} ? 'active'"
                                     th:each="page : ${#numbers.sequence((currentPage > 2 ? currentPage - 2 : 1) , (currentPage + 2 < totalPages ? currentPage + 2 : totalPages))}">
-                                    <a th:replace="~{fragments/paging :: paging(${page}, ${page}, 'Page ' + ${page},${currentPageUrl})}"></a>
+                                    <a th:replace="~{fragments/paging :: paging(${page}, ${page}, 'Page ' + ${page})}"></a>
                                 </li>
                                 <li class="page-item disabled" th:if="${currentPage + 2 < totalPages}">
                                     <a class="page-link" href="#">...</a>
                                 </li>
                                 <li class="page-item font-weight-bold"
                                     th:classappend="${currentPage == totalPages} ? 'disabled'">
-                                    <a th:replace="~{fragments/paging :: paging(${currentPage + 1},'Next', 'Next Page',${currentPageUrl})}"></a>
+                                    <a th:replace="~{fragments/paging :: paging(${currentPage + 1},'Next', 'Next Page')}"></a>
                                 </li>
                                 <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
-                                    <a th:replace="~{fragments/paging :: paging(${totalPages}, '>>', 'Last Page',${currentPageUrl})}"></a>
+                                    <a th:replace="~{fragments/paging :: paging(${totalPages}, '>>', 'Last Page')}"></a>
                                 </li>
                             </ul>
                         </nav>
@@ -68,22 +68,19 @@
             </div>
             <div class="card-sizing" th:each="image : ${images}">
                 <div class="card">
-                        <a th:href="@{'api/'+${apiType}+'/'+${image.getMediaId()}}">
-                            <div class="overflow-hidden  image-box"><img class="card-img" srcset=""
-                                                                         th:src="@{'/api/'+${apiType}+'/' + ${image.getMediaId()} + '?width=300&height=169'}"
-                                                                         src="../../../../image/18838.png/"></div>
-                            <div class="card-img-overlay hover-text-card">
-                                <p th:text="${image.getTagsInString()}"></p>
-                            </div>
-                        </a>
+                    <a th:href="@{/api/{id}(id = ${image.getMediaId()})}">
+                        <div class="overflow-hidden  image-box"><img class="card-img" srcset=""
+                                                                     th:src="@{'/api/' + ${image.getMediaId()} + '?width=300&height=169'}"
+                                                                     src="../../../../image/18838.png/"></div>
+                        <div class="card-img-overlay hover-text-card">
+                            <p th:text="${image.getTagsInString()}"></p>
+                        </div>
+                    </a>
 
                 </div>
             </div>
         </div>
     </div>
 </section>
-<footer th:replace="~{fragments/footer}">
-
-</footer>
 </body>
 </html>
