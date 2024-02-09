@@ -1,12 +1,12 @@
 <header th:fragment="header(pageName)">
     <nav class="navbar bg-body-tertiary">
-        <a href="/" class="navbar-brand">Lesson In Love Gallery</a>
+        <a href="/image" class="navbar-brand">Lesson In Love Gallery</a>
         <ul class="nav ">
             <li th:if="${#authentication.getAuthorities().stream().findFirst().get().getAuthority().equals('ROLE_ADMIN')}" class="nav-item ">
                 <a class="nav-link"  href="/admin">Admin Panel</a>
             </li>
             <li class="nav-item ">
-                <a class="nav-link"  href="/">Images</a>
+                <a class="nav-link"  href="/image">Images</a>
             </li>
             <li class="nav-item ">
                 <a class="nav-link" href="/fan-images">Fan Images</a>

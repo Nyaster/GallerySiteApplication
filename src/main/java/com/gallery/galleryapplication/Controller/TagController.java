@@ -18,8 +18,6 @@ public class TagController {
     TagService tagService;
     @GetMapping("/api/tags")
     public List<String> getTags(@RequestParam String query) {
-        // Ваш код для обработки запроса и возврата подходящих тегов
-        // Например, из базы данных или статического списка
         String lastTag = Arrays.stream(query.split(",")).toList().getLast().trim();
         return tagService.findTagsByNameLikeIgnoreCase(lastTag).stream()
                 .map(Tag::getName)

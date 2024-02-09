@@ -1,5 +1,6 @@
 package com.gallery.galleryapplication.util.LessonInLoveDonwloader;
 
+import com.gallery.galleryapplication.models.Author;
 import com.gallery.galleryapplication.models.FanArtImage;
 import com.gallery.galleryapplication.models.Image;
 import com.gallery.galleryapplication.models.Tag;
@@ -25,6 +26,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -146,13 +148,16 @@ public class RequestPageAnalyzer {
         if (tags.equalsIgnoreCase("None yet")) {
             return null;
         }
-        String author = element.child(2).ownText();
+        String authorName = element.child(2).ownText();
+        Author author = new Author();
+        author.setName(authorName);
         String likesString = element.child(3).child(1).ownText();
         int likes = Integer.parseInt(likesString);
         image.setPathToFileOnDisc(downloadImage(imageUrl, mediaId));
         image.setMediaId(Integer.parseInt(mediaId));
         image.setCreationDate(simpleDateFormat.parse(date));
         image.setTags(Tag.createTagsFromList(Stream.of(tags.split(",")).map(x -> x.toLowerCase().trim()).toList()));
+        image.setAuthor(author);
         return image;
     }
 
@@ -231,9 +236,32 @@ public class RequestPageAnalyzer {
              fanArtImages = images.parallelStream().map(x-> {
                 FanArtImage fanArtImage = new FanArtImage();
                 fanArtImage.setPathToFileOnDisc(x.getPath());
+                fanArtImage.setCreationDate(extractTimestampFromFilePath(fanArtImage.getPathToFileOnDisc()));
                 return fanArtImage;
             }).toList();
         }
         return fanArtImages;
+    }
+    private Date extractTimestampFromFilePath(String filePath) {
+        // Регулярное выражение для поиска даты и времени в формате "yyyy-MM-dd_HH-mm-ss"
+        String regex = "(\\d{4}-\\d{2}-\\d{2})_(\\d{2}-\\d{2}-\\d{2})";
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regex);
+        java.util.regex.Matcher matcher = pattern.matcher(filePath);
+
+        if (matcher.find()) {
+            String datePart = matcher.group(1);
+            String timePart = matcher.group(2);
+
+            String dateTimeString = datePart + "_" + timePart;
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+            try {
+                Date parsedDate = dateFormat.parse(dateTimeString);
+                return parsedDate;
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 }

@@ -29,7 +29,7 @@ public class WebsiteLoginService {
 
     public boolean getLoginStatus(){
         try {
-            return webClient.getPage("https://lessonsinlovegame.com/galleries/requests/").getUrl().toString().equals("***REMOVED***");
+            return webClient.getPage("https://lessonsinlovegame.com/galleries/requests/").getUrl().toString().equals("https://lessonsinlovegame.com/account/login/");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

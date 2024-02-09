@@ -1,5 +1,6 @@
 package com.gallery.galleryapplication.services;
 
+import com.gallery.galleryapplication.models.Author;
 import com.gallery.galleryapplication.models.FanArtImage;
 import com.gallery.galleryapplication.models.Image;
 import com.gallery.galleryapplication.models.Tag;
@@ -129,7 +130,7 @@ public class ImageService {
             saveAll(images);
             createThumbnailsImagesForAllImages();
         } catch (IOException e) {
-            LoggerFactory.getLogger(this.getClass()).error("Error while chekigns update");
+            LoggerFactory.getLogger(this.getClass()).error("Error while cheking update");
         }
     }
 }

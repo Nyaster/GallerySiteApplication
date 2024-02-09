@@ -1,14 +1,14 @@
 package com.gallery.galleryapplication.Controller;
 
+import com.gallery.galleryapplication.Controller.interfaces.imageInterface;
 import com.gallery.galleryapplication.models.FanArtImage;
 import com.gallery.galleryapplication.models.Image;
-import com.gallery.galleryapplication.models.Tag;
 import com.gallery.galleryapplication.security.PersonDetails;
 import com.gallery.galleryapplication.services.FanImageService;
 import com.gallery.galleryapplication.services.ImageService;
 import com.gallery.galleryapplication.services.TagService;
 import com.gallery.galleryapplication.util.LessonInLoveDonwloader.RequestPageAnalyzer;
-import org.slf4j.LoggerFactory;
+import com.gallery.galleryapplication.util.ModelPreparatorForPages;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,29 +22,27 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @Controller
-public class defaultController {
-
+public class pageController {
+    private final int PAGESIZE = 20;
     private final ImageService imageService;
-    private final RequestPageAnalyzer requestPageAnalyzer;
     private final TagService tagService;
     private final FanImageService fanImageService;
+    private final ModelPreparatorForPages modelPreparatorForPages;
 
-    public defaultController(ImageService imageService, RequestPageAnalyzer requestPageAnalyzer, TagService tagService, FanImageService fanImageService) {
+    public pageController(ImageService imageService, TagService tagService, FanImageService fanImageService, ModelPreparatorForPages modelPreparatorForPages) {
         this.imageService = imageService;
-        this.requestPageAnalyzer = requestPageAnalyzer;
         this.tagService = tagService;
         this.fanImageService = fanImageService;
+        this.modelPreparatorForPages = modelPreparatorForPages;
     }
 
-    @GetMapping()
+    @GetMapping("/image"
+    )
     public String indexPage(Model model, @RequestParam(required = false) String keyword, @RequestParam(defaultValue = "1") int page) {
-        int size = 20;
-        Pageable paging = PageRequest.of(page - 1, size, Sort.by("creationDate").descending());
+        Pageable paging = PageRequest.of(page - 1, PAGESIZE, Sort.by("creationDate").descending().and(Sort.by("mediaId").descending()));
         Page<Image> pages;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         PersonDetails personDetails = null;
@@ -57,21 +55,12 @@ public class defaultController {
             pages = imageService.getImagesByTags(keyword, paging);
             model.addAttribute("keyword", keyword);
         }
-        model.addAttribute("personDetails", personDetails);
-        model.addAttribute("images", pages.get().toList());
-        model.addAttribute("currentPage", pages.getNumber() + 1);
-        model.addAttribute("totalItems", pages.getTotalElements());
-        model.addAttribute("totalPages", pages.getTotalPages());
-        model.addAttribute("pageSize", size);
-        model.addAttribute("pageTitle", "home");
-        model.addAttribute("currentPageUrl","/");
-        model.addAttribute("apiType","image");
+        model = modelPreparatorForPages.prepareModelForIndexAndFanArtPage(model,pages, "/image",PAGESIZE);
         return "index";
     }
     @GetMapping("/fan-images")
     public String fanArtsPage(Model model, @RequestParam(required = false) String keyword, @RequestParam(defaultValue = "1") int page){
-        int size = 20;
-        Pageable paging = PageRequest.of(page - 1, size, Sort.by("creationDate").descending());
+        Pageable paging = PageRequest.of(page - 1, PAGESIZE, Sort.by("creationDate").descending().and(Sort.by("id").descending()));
         Page<FanArtImage> pages;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         PersonDetails personDetails = null;
@@ -84,18 +73,10 @@ public class defaultController {
             pages = fanImageService.getImagesByTags(keyword, paging);
             model.addAttribute("keyword", keyword);
         }
-
-        model.addAttribute("personDetails", personDetails);
-        model.addAttribute("images", pages.get().toList());
-        model.addAttribute("currentPage", pages.getNumber() + 1);
-        model.addAttribute("totalItems", pages.getTotalElements());
-        model.addAttribute("totalPages", pages.getTotalPages());
-        model.addAttribute("pageSize", size);
-        model.addAttribute("pageTitle", "home");
-        model.addAttribute("currentPageUrl","/fan-images");
-        model.addAttribute("apiType","fan-images");
+        model = modelPreparatorForPages.prepareModelForIndexAndFanArtPage(model,pages, "/fan-images",PAGESIZE);
         return "index";
     }
+
     @Secured({"ROLE_ADMIN"})
     @GetMapping("api/image/{id}/edit")
     public String getEditPage(@PathVariable Integer id, Model model){

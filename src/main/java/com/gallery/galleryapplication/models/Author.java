@@ -19,4 +19,5 @@ public class Author {
     private List<Image> images;
     @OneToMany(mappedBy = "author")
     private List<FanArtImage> fanImages;
+    private String Name;
 }

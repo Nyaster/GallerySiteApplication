@@ -4,6 +4,7 @@ import com.gallery.galleryapplication.models.Person;
 import com.gallery.galleryapplication.services.RegistrationService;
 import com.gallery.galleryapplication.util.PersonValidator;
 import jakarta.validation.Valid;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +25,7 @@ public class authController {
 
     @GetMapping("/login")
     public String   loginPage() {
+        LoggerFactory.getLogger(this.getClass()).info("USER LOGGED IN");
         return "auth/login";
     }
 

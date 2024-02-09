@@ -1,5 +1,6 @@
 package com.gallery.galleryapplication.models;
 
+import com.gallery.galleryapplication.Controller.interfaces.imageInterface;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +11,7 @@ import java.util.Objects;
 @Entity
 @Getter
 @Setter
-public class FanArtImage {
+public class FanArtImage implements imageInterface {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
