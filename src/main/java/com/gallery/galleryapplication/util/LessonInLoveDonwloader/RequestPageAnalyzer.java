@@ -256,10 +256,9 @@ public class RequestPageAnalyzer {
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
             try {
-                Date parsedDate = dateFormat.parse(dateTimeString);
-                return parsedDate;
+                return dateFormat.parse(dateTimeString);
             } catch (ParseException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(this.getClass()).error("Error while trying parse a date", e);
             }
         }
         return null;

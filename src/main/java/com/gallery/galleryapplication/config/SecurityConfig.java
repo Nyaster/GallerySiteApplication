@@ -9,10 +9,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -32,33 +30,34 @@ public class SecurityConfig {
         this.personDetailService = personDetailService;
     }
 
-
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        //.requiresChannel(x->x.anyRequest().requiresSecure()) добавить что бы редирект
-        http.portMapper(x->x.http(httpPort).mapsTo(SSLport)).formLogin(form->form.loginPage("/auth/login").loginProcessingUrl("/auth/process_login")
-                        .defaultSuccessUrl("/fan-images").failureUrl("/auth/login?error"))
-                .logout(logout->logout
-                        .logoutUrl("/auth/logout")
-                        .logoutSuccessUrl("/auth/login?logout"))
-                .authorizeHttpRequests((authz) ->
-                        authz.requestMatchers("/favicons/**").permitAll().requestMatchers("/admin/**","auth/registration/**").hasRole("ADMIN")
-                                .requestMatchers("api/*/*/edit").hasRole("EDITOR")
-                                .requestMatchers("/auth/**","/styles/**").permitAll().anyRequest().authenticated())
-                .rememberMe(x->x.userDetailsService(personDetailService)).userDetailsService(personDetailService)
-                .httpBasic(withDefaults());
-        return http.build();
-    }
-    @Bean
-    PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
-    }
     @Bean
     static RoleHierarchy roleHierarchy() {
         RoleHierarchyImpl hierarchy = new RoleHierarchyImpl();
         hierarchy.setHierarchy("ROLE_ADMIN > ROLE_EDITOR\n" +
                 "ROLE_EDITOR > ROLE_USER\n");
         return hierarchy;
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        //.requiresChannel(x->x.anyRequest().requiresSecure()) добавить что бы редирект
+        http.portMapper(x -> x.http(httpPort).mapsTo(SSLport)).formLogin(form -> form.loginPage("/auth/login").loginProcessingUrl("/auth/process_login")
+                        .defaultSuccessUrl("/fan-images").failureUrl("/auth/login?error"))
+                .logout(logout -> logout
+                        .logoutUrl("/auth/logout")
+                        .logoutSuccessUrl("/auth/login?logout"))
+                .authorizeHttpRequests((authz) ->
+                        authz.requestMatchers("/favicons/**").permitAll().requestMatchers("/admin/**", "auth/registration/**").hasRole("ADMIN")
+                                .requestMatchers("api/*/*/edit").hasRole("EDITOR")
+                                .requestMatchers("/auth/**", "/styles/**").permitAll().anyRequest().authenticated())
+                .rememberMe(x -> x.userDetailsService(personDetailService)).userDetailsService(personDetailService)
+                .httpBasic(withDefaults());
+        return http.build();
+    }
+
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
