@@ -2,9 +2,9 @@ package com.gallery.galleryapplication.Controller.api;
 
 import com.gallery.galleryapplication.models.DDO.TagsDDO;
 import com.gallery.galleryapplication.models.FanArtImage;
-import com.gallery.galleryapplication.models.Image;
 import com.gallery.galleryapplication.models.Tag;
 import com.gallery.galleryapplication.services.FanImageService;
+import com.gallery.galleryapplication.services.ImageService;
 import com.gallery.galleryapplication.services.TagService;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
@@ -23,11 +23,11 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/fan-images")
-public class fanArtController {
+public class FanArtController {
     private final TagService tagService;
     private final FanImageService fanImageService;
 
-    public fanArtController(TagService tagService, FanImageService imageService1) {
+    public FanArtController(TagService tagService, FanImageService imageService1, ImageService imageService) {
         this.tagService = tagService;
         this.fanImageService = imageService1;
     }
@@ -66,13 +66,13 @@ public class fanArtController {
 
         }).collect(Collectors.toList());
         List<Tag> newOriginalTags = new ArrayList<>(tagsSet);
+        if (newOriginalTags.stream().anyMatch(x -> x.getName().length() > 50)) {
+            return ResponseEntity.badRequest().body("Error in length tags");
+        }
         List<Tag> allTags = tagService.getAll();
         tagsSet.removeAll(allTags);
         if (!tagsSet.isEmpty()) {
             tagService.addNewTags(tagsSet);
-        }
-        if (newOriginalTags.stream().anyMatch(x -> x.getName().length() > 50)) {
-            return ResponseEntity.badRequest().body("Error in length tags");
         }
         try {
             newOriginalTags.forEach(x -> x.setId(allTags.stream().filter(j -> j.getName().equalsIgnoreCase(x.getName())).map(Tag::getId).findAny().orElseThrow()));

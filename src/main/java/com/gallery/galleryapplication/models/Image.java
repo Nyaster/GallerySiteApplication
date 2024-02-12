@@ -1,6 +1,6 @@
 package com.gallery.galleryapplication.models;
 
-import com.gallery.galleryapplication.Controller.interfaces.imageInterface;
+import com.gallery.galleryapplication.models.Interfaces.ThumbnailProvider;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,7 +12,7 @@ import java.util.Objects;
 @Setter
 @Getter
 @Entity
-public class Image implements imageInterface {
+public class Image implements ThumbnailProvider {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -23,6 +23,7 @@ public class Image implements imageInterface {
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     private List<Tag> tags;
+
     @Getter
     @Column(unique = true)
     private int mediaId;
@@ -33,6 +34,8 @@ public class Image implements imageInterface {
     @JoinColumn(name = "author_id", referencedColumnName = "id")
     private Author author;
     private String pathToFileOnDisc;
+    @Getter
+    @Setter
     private String pathToImageThumbnailOnDisc;
     @Transient
     private String tagsInString;
@@ -50,6 +53,6 @@ public class Image implements imageInterface {
     }
 
     public String getTagsInString() {
-        return getTags().stream().map(x->x.getName()).reduce((x,y)->x+", "+y).orElse("");
+        return getTags().stream().map(Tag::getName).reduce((x, y)->x+", "+y).orElse("");
     }
 }

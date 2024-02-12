@@ -23,7 +23,6 @@ public class TagService {
     @Transactional
     public void addNewTags(List<Tag> tag){
         tagRepository.saveAll(tag);
-        tagRepository.flush();
     }
     @Transactional
     public List<Tag> findTagsByNameLikeIgnoreCase(String tag) {

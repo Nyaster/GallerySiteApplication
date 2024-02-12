@@ -44,15 +44,11 @@ public class RequestPageAnalyzer {
     @Value("${website.request}")
     String requestLink;
     List<Image> images;
-    List<List<String>> bannedTags;
 
     @Autowired
     public RequestPageAnalyzer(WebsiteLoginService loginService) {
         this.loginService = loginService;
         images = new ArrayList<>();
-        bannedTags = new ArrayList<>();
-        bannedTags.add(Arrays.stream("loli,nsfw".split(",")).toList());
-        bannedTags.add(Arrays.stream("shota,nsfw".split(",")).toList());
     }
 
     private int getPageLimit() throws IOException {
@@ -110,8 +106,7 @@ public class RequestPageAnalyzer {
         try {
             WebClient webClient = loginService.getWebClient();
             String url = "https://lessonsinlovegame.com" + urlE;
-            try (InputStream in = webClient.getPage(url).getWebResponse().getContentAsStream();
-                 FileOutputStream fos = new FileOutputStream(CURRENT_DIRECTORY + File.separator + "image" + File.separator + mediaId + ".png")) {
+            try (InputStream in = webClient.getPage(url).getWebResponse().getContentAsStream(); FileOutputStream fos = new FileOutputStream(CURRENT_DIRECTORY + File.separator + "image" + File.separator + mediaId + ".png")) {
                 int len;
                 byte[] buffer = new byte[4096]; // Experiment with different buffer sizes
                 while ((len = in.read(buffer)) != -1) {
@@ -167,27 +162,26 @@ public class RequestPageAnalyzer {
         File folder = new File(currentDirectory + File.separator + "image");
         if (!folder.exists()) {
             if (folder.mkdirs()) {
-                System.out.println("Folder created successfully.");
+                LoggerFactory.getLogger(getClass()).info("Folder created successfully.");
             } else {
-                System.out.println("Failed to create the folder.");
+                LoggerFactory.getLogger(getClass()).error("Failed to create the folder.");
             }
         } else {
-            System.out.println("The folder already exists.");
+            LoggerFactory.getLogger(getClass()).info("The folder already exists.");
         }
+
         try {
             if (loginService.getLoginStatus()) {
                 loginService.loginToWebsite();
+                analyzeRequestPages();
             }
         } catch (IOException e) {
-            LoggerFactory.getLogger(this.getClass()).error("Error to logging sitee" + e.getMessage());
+            LoggerFactory.getLogger(getClass()).error("Error in analyzing request pages: " + e.getMessage());
         }
-        try {
-            analyzeRequestPages();
-        } catch (IOException e) {
-            LoggerFactory.getLogger(this.getClass()).error("Error to logging errorInAnalyze" + e.getMessage());
-        }
-        return images = images.stream().distinct().collect(Collectors.toList());
+
+        return images.stream().distinct().collect(Collectors.toList());
     }
+
 
     @PostConstruct
     public void onStartUp() {
@@ -218,9 +212,9 @@ public class RequestPageAnalyzer {
             } catch (ParseException e) {
                 LoggerFactory.getLogger(this.getClass()).error("Something gonna wrong");
             }
-            if(allImages.stream().filter(newImages::contains).findAny().isEmpty()) {
+            if (allImages.stream().filter(newImages::contains).findAny().isEmpty()) {
                 globalNewImages.addAll(newImages);
-            }else {
+            } else {
                 globalNewImages.addAll(newImages);
                 break;
             }
@@ -231,9 +225,9 @@ public class RequestPageAnalyzer {
     public List<FanArtImage> scanImagesFromFolder() {
         File imageFolder = new File(CURRENT_DIRECTORY + File.separator + "imageFanArts");
         List<FanArtImage> fanArtImages = new ArrayList<>();
-        if (imageFolder.exists() && imageFolder.isDirectory()){
+        if (imageFolder.exists() && imageFolder.isDirectory()) {
             List<File> images = Arrays.stream(imageFolder.listFiles()).toList();
-             fanArtImages = images.parallelStream().map(x-> {
+            fanArtImages = images.parallelStream().map(x -> {
                 FanArtImage fanArtImage = new FanArtImage();
                 fanArtImage.setPathToFileOnDisc(x.getPath());
                 fanArtImage.setCreationDate(extractTimestampFromFilePath(fanArtImage.getPathToFileOnDisc()));
@@ -242,6 +236,7 @@ public class RequestPageAnalyzer {
         }
         return fanArtImages;
     }
+
     private Date extractTimestampFromFilePath(String filePath) {
         // Регулярное выражение для поиска даты и времени в формате "yyyy-MM-dd_HH-mm-ss"
         String regex = "(\\d{4}-\\d{2}-\\d{2})_(\\d{2}-\\d{2}-\\d{2})";

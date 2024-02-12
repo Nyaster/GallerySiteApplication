@@ -1,13 +1,11 @@
 package com.gallery.galleryapplication.Controller;
 
-import com.gallery.galleryapplication.Controller.interfaces.imageInterface;
 import com.gallery.galleryapplication.models.FanArtImage;
 import com.gallery.galleryapplication.models.Image;
 import com.gallery.galleryapplication.security.PersonDetails;
 import com.gallery.galleryapplication.services.FanImageService;
 import com.gallery.galleryapplication.services.ImageService;
 import com.gallery.galleryapplication.services.TagService;
-import com.gallery.galleryapplication.util.LessonInLoveDonwloader.RequestPageAnalyzer;
 import com.gallery.galleryapplication.util.ModelPreparatorForPages;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,20 +23,23 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.Optional;
 
 @Controller
-public class pageController {
+public class PageController {
     private final int PAGESIZE = 20;
     private final ImageService imageService;
     private final TagService tagService;
     private final FanImageService fanImageService;
     private final ModelPreparatorForPages modelPreparatorForPages;
 
-    public pageController(ImageService imageService, TagService tagService, FanImageService fanImageService, ModelPreparatorForPages modelPreparatorForPages) {
+    public PageController(ImageService imageService, TagService tagService, FanImageService fanImageService, ModelPreparatorForPages modelPreparatorForPages) {
         this.imageService = imageService;
         this.tagService = tagService;
         this.fanImageService = fanImageService;
         this.modelPreparatorForPages = modelPreparatorForPages;
     }
-
+    @GetMapping("/")
+    public String redirectToImages(){
+        return "redirect:/image";
+    }
     @GetMapping("/image"
     )
     public String indexPage(Model model, @RequestParam(required = false) String keyword, @RequestParam(defaultValue = "1") int page) {
@@ -62,13 +63,8 @@ public class pageController {
     public String fanArtsPage(Model model, @RequestParam(required = false) String keyword, @RequestParam(defaultValue = "1") int page){
         Pageable paging = PageRequest.of(page - 1, PAGESIZE, Sort.by("creationDate").descending().and(Sort.by("id").descending()));
         Page<FanArtImage> pages;
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        PersonDetails personDetails = null;
-        if (!authentication.getAuthorities().stream().findFirst().get().getAuthority().equals("ROLE_ANONYMOUS")) {
-            personDetails = (PersonDetails) authentication.getPrincipal();
-        }
         if (keyword == null || keyword.isBlank()) {
-            pages = fanImageService.getAll(paging, personDetails!=null);
+            pages = fanImageService.getAll(paging, true);
         } else {
             pages = fanImageService.getImagesByTags(keyword, paging);
             model.addAttribute("keyword", keyword);

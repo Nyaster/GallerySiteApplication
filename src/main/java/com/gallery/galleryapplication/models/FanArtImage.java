@@ -1,6 +1,6 @@
 package com.gallery.galleryapplication.models;
 
-import com.gallery.galleryapplication.Controller.interfaces.imageInterface;
+import com.gallery.galleryapplication.models.Interfaces.ThumbnailProvider;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,19 +8,16 @@ import lombok.Setter;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+
 @Entity
 @Getter
 @Setter
-public class FanArtImage implements imageInterface {
+public class FanArtImage implements ThumbnailProvider {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-    @JoinTable(
-            name = "Fan_Art_Image_Tag",
-            joinColumns = @JoinColumn(name = "image_id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id")
-    )
+    @JoinTable(name = "Fan_Art_Image_Tag", joinColumns = @JoinColumn(name = "image_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private List<Tag> tags;
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationDate;
@@ -39,15 +36,17 @@ public class FanArtImage implements imageInterface {
         FanArtImage that = (FanArtImage) o;
         return id == that.id;
     }
-    public int getMediaId(){
+
+    public int getMediaId() {
         return getId();
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(id);
     }
 
     public String getTagsInString() {
-        return getTags().stream().map(x->x.getName()).reduce((x,y)->x+", "+y).orElse("");
+        return getTags().stream().map(Tag::getName).reduce((x, y) -> x + ", " + y).orElse("");
     }
 }
