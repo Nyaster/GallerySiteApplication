@@ -3,11 +3,12 @@ package com.gallery.galleryapplication.util;
 import com.gallery.galleryapplication.models.Interfaces.ThumbnailProvider;
 import net.coobird.thumbnailator.Thumbnails;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-
+@Component
 public class ThumbNailUtilities {
     public void createThumbnailAndUpdateImage(ThumbnailProvider image, Integer width, Integer height) throws IOException {
         Path filePath = Path.of(image.getPathToFileOnDisc());

@@ -2,6 +2,8 @@ package com.gallery.galleryapplication.Controller;
 
 import com.gallery.galleryapplication.models.FanArtImage;
 import com.gallery.galleryapplication.models.Image;
+import com.gallery.galleryapplication.models.Interfaces.ImageProvider;
+import com.gallery.galleryapplication.models.Interfaces.ThumbnailProvider;
 import com.gallery.galleryapplication.security.PersonDetails;
 import com.gallery.galleryapplication.services.FanImageService;
 import com.gallery.galleryapplication.services.ImageService;
@@ -76,29 +78,21 @@ public class PageController {
     @Secured({"ROLE_ADMIN"})
     @GetMapping("api/image/{id}/edit")
     public String getEditPage(@PathVariable Integer id, Model model){
-        Optional<Image> image = imageService.getByMediaId(id);
-        if (image.isEmpty()){
-            return "redirect:/";
-        }
-        String tags = tagService.getAllInStrin();
-        model.addAttribute("image",image.get());
-        model.addAttribute("initialWhitelist",tags);
-        model.addAttribute("apiType","image");
+        prepareModelForEditPage(model,"image",id);
         return "edit";
     }
     @Secured({"ROLE_EDITOR"})
     @GetMapping("api/fan-images/{id}/edit")
     public String getEditFanArtPage(@PathVariable Integer id, Model model){
-        Optional<FanArtImage> image1 = fanImageService.getById(id);
-        if (image1.isEmpty()){
-            return "redirect:/";
-        }
-        String tags = tagService.getAllInStrin();
-        FanArtImage image = image1.get();
-        model.addAttribute("image",image);
-        model.addAttribute("initialWhitelist",tags);
-        model.addAttribute("apiType","fan-images");
+        prepareModelForEditPage(model,"fan-images",id);
         return "edit";
+    }
+    private void prepareModelForEditPage(Model model, String apiType, int id){
+        Optional<? extends ThumbnailProvider> image = apiType.equalsIgnoreCase("image") ? imageService.getByMediaId(id) : fanImageService.getById(id);
+        String tags = tagService.getAllInStrin();
+        model.addAttribute("image",image.get());
+        model.addAttribute("initialWhitelist",tags);
+        model.addAttribute("apiType",apiType);
     }
 
 

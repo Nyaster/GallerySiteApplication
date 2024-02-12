@@ -1,9 +1,11 @@
 package com.gallery.galleryapplication.models;
 
+import com.gallery.galleryapplication.models.Interfaces.ImageProvider;
 import com.gallery.galleryapplication.models.Interfaces.ThumbnailProvider;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.util.Date;
 import java.util.List;
@@ -12,7 +14,8 @@ import java.util.Objects;
 @Setter
 @Getter
 @Entity
-public class Image implements ThumbnailProvider {
+@Cacheable("images")
+public class Image implements ThumbnailProvider, ImageProvider {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;

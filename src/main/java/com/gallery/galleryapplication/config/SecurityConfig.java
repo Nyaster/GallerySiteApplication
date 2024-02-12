@@ -42,7 +42,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         //.requiresChannel(x->x.anyRequest().requiresSecure()) добавить что бы редирект
         http.portMapper(x -> x.http(httpPort).mapsTo(SSLport)).formLogin(form -> form.loginPage("/auth/login").loginProcessingUrl("/auth/process_login")
-                        .defaultSuccessUrl("/fan-images").failureUrl("/auth/login?error"))
+                        .defaultSuccessUrl("/").failureUrl("/auth/login?error"))
                 .logout(logout -> logout
                         .logoutUrl("/auth/logout")
                         .logoutSuccessUrl("/auth/login?logout"))

@@ -27,9 +27,9 @@ public class FanArtController {
     private final TagService tagService;
     private final FanImageService fanImageService;
 
-    public FanArtController(TagService tagService, FanImageService imageService1, ImageService imageService) {
+    public FanArtController(TagService tagService, FanImageService imageService) {
         this.tagService = tagService;
-        this.fanImageService = imageService1;
+        this.fanImageService = imageService;
     }
 
     @GetMapping("/{id}")
@@ -77,12 +77,12 @@ public class FanArtController {
         try {
             newOriginalTags.forEach(x -> x.setId(allTags.stream().filter(j -> j.getName().equalsIgnoreCase(x.getName())).map(Tag::getId).findAny().orElseThrow()));
         } catch (NoSuchElementException e) {
-            return ResponseEntity.badRequest().body("Something happened while saving tagsg");
+            return ResponseEntity.badRequest().body("Something happened while saving tags");
         }
         Optional<FanArtImage> image = fanImageService.getById(id);
         image.get().setTags(newOriginalTags);
         fanImageService.editImageData(image.get());
-        return ResponseEntity.ok("Succefuly save");
+        return ResponseEntity.ok("Successfully save");
     }
 
 
