@@ -1,5 +1,6 @@
 package com.gallery.galleryapplication.config;
 
+import com.gallery.galleryapplication.services.LogEntryService;
 import com.gallery.galleryapplication.services.PersonDetailService;
 import org.apache.catalina.connector.Connector;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,6 +45,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http
             , RememberMeServices services
+            , CustomAuthenteficationSuccesHandler customAuthenteficationSuccesHandler
     ) throws Exception {
         //.requiresChannel(x->x.anyRequest().requiresSecure()) добавить что бы редирект
         http
@@ -51,7 +53,7 @@ public class SecurityConfig {
                 .formLogin(form -> form.loginPage("/auth/login").loginProcessingUrl("/auth/process_login")
                         .defaultSuccessUrl("/")
                         .failureUrl("/auth/login?error")
-                        .successHandler(customAuthenteficationSuccesHandler()))
+                        .successHandler(customAuthenteficationSuccesHandler))
                 .logout(logout -> logout
                         .logoutUrl("/auth/logout")
                         .logoutSuccessUrl("/auth/login?logout"))
@@ -59,14 +61,14 @@ public class SecurityConfig {
                         authz.requestMatchers("/favicons/**").permitAll().requestMatchers("/admin/**").hasRole("ADMIN")
                                 .requestMatchers("api/*/*/edit").hasRole("EDITOR")
                                 .requestMatchers("/auth/**", "/styles/**").permitAll().anyRequest().authenticated())
-                .rememberMe(x -> x.rememberMeServices(services).userDetailsService(personDetailService))
+                .rememberMe(x -> x.rememberMeServices(services).userDetailsService(personDetailService).authenticationSuccessHandler(customAuthenteficationSuccesHandler))
                 .httpBasic(withDefaults());
         return http.build();
     }
 
     @Bean
-    public CustomAuthenteficationSuccesHandler customAuthenteficationSuccesHandler() {
-        return new CustomAuthenteficationSuccesHandler();
+    public CustomAuthenteficationSuccesHandler customAuthenteficationSuccesHandler(LogEntryService logEntryService) {
+        return new CustomAuthenteficationSuccesHandler(logEntryService);
     }
 
     @Bean
