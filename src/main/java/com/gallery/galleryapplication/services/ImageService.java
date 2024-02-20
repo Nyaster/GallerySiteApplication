@@ -1,6 +1,7 @@
 package com.gallery.galleryapplication.services;
 
 import com.gallery.galleryapplication.models.Image;
+import com.gallery.galleryapplication.models.Interfaces.ThumbnailProvider;
 import com.gallery.galleryapplication.models.Tag;
 import com.gallery.galleryapplication.repositories.ImageRepository;
 import com.gallery.galleryapplication.repositories.TagRepository;
@@ -22,6 +23,8 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class ImageService {
+    public static final int WIDTH = 300;
+    public static final int HEIGHT = 169;
     private final ImageRepository imageRepository;
     private final TagRepository tagRepository;
     private final ThumbNailUtilities thumbNailUtilities;
@@ -50,13 +53,22 @@ public class ImageService {
         tags.removeAll(tagsFromDb);
         tagRepository.saveAll(tags);
         tagsFromDb.addAll(tags);
-        list.parallelStream().forEach(x -> {
+        list.forEach(x -> {
             List<Tag> temp = x.getTags();
             List<Tag> replacedTags = new ArrayList<>(tagsFromDb);
             replacedTags.retainAll(temp);
             x.setTags(replacedTags);
         });
-        imageRepository.saveAll(new HashSet<>(list));
+        HashSet<Image> entities = new HashSet<>(list);
+        entities.parallelStream().forEach(x-> {
+            try {
+                thumbNailUtilities.createThumbnailAndUpdateImage(x,WIDTH,HEIGHT);
+            } catch (IOException e) {
+                LoggerFactory.getLogger(this.getClass()).error("Error while generating thumbnails", e);
+            }
+            //x.setPathToImageThumbnailOnDisc(((ThumbnailProvider)x).getPathToImageThumbnailOnDisc());
+        });
+        imageRepository.saveAll(entities);
     }
 
     public Page<Image> getAll(Pageable paging, boolean nsfw) {
@@ -88,12 +100,11 @@ public class ImageService {
         imageRepository.save(updatedImage);
     }
 
-    @PostConstruct
     public void createThumbnailsImagesForAllImages() {
         List<Image> images = imageRepository.findByPathToImageThumbnailOnDiscNull();
         images.parallelStream().forEach(x -> {
             try {
-                thumbNailUtilities.createThumbnailAndUpdateImage(x, 300, 169);
+                thumbNailUtilities.createThumbnailAndUpdateImage(x, WIDTH, HEIGHT);
             } catch (IOException e) {
                 LoggerFactory.getLogger(this.getClass()).error("Something happened while generating thumbnails");
             }
@@ -102,7 +113,8 @@ public class ImageService {
     }
 
     public void analyzeRequestPages() {
-        requestPageAnalyzer.loginAndDownloadImages();
+        List<Image> images = requestPageAnalyzer.loginAndDownloadImages();
+        saveAll(images);
     }
 
 

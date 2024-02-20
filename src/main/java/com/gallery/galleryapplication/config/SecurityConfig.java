@@ -14,6 +14,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.RememberMeServices;
+import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -21,6 +23,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableMethodSecurity
 public class SecurityConfig {
     private final PersonDetailService personDetailService;
+    private final String MY_KEY = "TemporaryKey";
     @Value("${server.http.port}")
     private int httpPort;
     @Value("${server.port}")
@@ -39,20 +42,40 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http
+            , RememberMeServices services
+    ) throws Exception {
         //.requiresChannel(x->x.anyRequest().requiresSecure()) добавить что бы редирект
-        http.portMapper(x -> x.http(httpPort).mapsTo(SSLport)).formLogin(form -> form.loginPage("/auth/login").loginProcessingUrl("/auth/process_login")
-                        .defaultSuccessUrl("/").failureUrl("/auth/login?error"))
+        http
+                .portMapper(x -> x.http(httpPort).mapsTo(SSLport))
+                .formLogin(form -> form.loginPage("/auth/login").loginProcessingUrl("/auth/process_login")
+                        .defaultSuccessUrl("/")
+                        .failureUrl("/auth/login?error")
+                        .successHandler(customAuthenteficationSuccesHandler()))
                 .logout(logout -> logout
                         .logoutUrl("/auth/logout")
                         .logoutSuccessUrl("/auth/login?logout"))
                 .authorizeHttpRequests((authz) ->
-                        authz.requestMatchers("/favicons/**").permitAll().requestMatchers("/admin/**", "auth/registration/**").hasRole("ADMIN")
+                        authz.requestMatchers("/favicons/**").permitAll().requestMatchers("/admin/**").hasRole("ADMIN")
                                 .requestMatchers("api/*/*/edit").hasRole("EDITOR")
                                 .requestMatchers("/auth/**", "/styles/**").permitAll().anyRequest().authenticated())
-                .rememberMe(x -> x.userDetailsService(personDetailService)).userDetailsService(personDetailService)
+                .rememberMe(x -> x.rememberMeServices(services).userDetailsService(personDetailService))
                 .httpBasic(withDefaults());
         return http.build();
+    }
+
+    @Bean
+    public CustomAuthenteficationSuccesHandler customAuthenteficationSuccesHandler() {
+        return new CustomAuthenteficationSuccesHandler();
+    }
+
+    @Bean
+    RememberMeServices rememberMeServices(PersonDetailService userDetailsService) {
+        TokenBasedRememberMeServices.RememberMeTokenAlgorithm encodingAlgorithm = TokenBasedRememberMeServices.RememberMeTokenAlgorithm.SHA256;
+        TokenBasedRememberMeServices rememberMe = new TokenBasedRememberMeServices(MY_KEY, userDetailsService, encodingAlgorithm);
+        rememberMe.setMatchingAlgorithm(TokenBasedRememberMeServices.RememberMeTokenAlgorithm.MD5);
+        rememberMe.setUseSecureCookie(true);
+        return rememberMe;
     }
 
     @Bean
@@ -68,5 +91,4 @@ public class SecurityConfig {
             factory.addAdditionalTomcatConnectors(connector);
         };
     }
-
 }

@@ -72,7 +72,7 @@ public class ImageController {
         try {
             newOriginalTags.forEach(x -> x.setId(allTags.stream().filter(j -> j.getName().equalsIgnoreCase(x.getName())).map(Tag::getId).findAny().orElseThrow()));
         } catch (NoSuchElementException e) {
-            return ResponseEntity.badRequest().body("Something happened while saving tagsg");
+            return ResponseEntity.badRequest().body("Something happened while saving tags");
         }
         Optional<Image> image = imageService.getByMediaId(id);
         image.get().setTags(newOriginalTags);

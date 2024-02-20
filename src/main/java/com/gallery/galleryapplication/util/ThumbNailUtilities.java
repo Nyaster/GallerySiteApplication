@@ -13,11 +13,11 @@ public class ThumbNailUtilities {
     public void createThumbnailAndUpdateImage(ThumbnailProvider image, Integer width, Integer height) throws IOException {
         Path filePath = Path.of(image.getPathToFileOnDisc());
         Path parentDirectory = filePath.getParent();
-        if (parentDirectory != null) {
+        if (parentDirectory == null) {
             LoggerFactory.getLogger(this.getClass()).error("Something get wrong while creating thumbnail");
         }
 
-        String placeToSave = parentDirectory.toFile().getPath() + "Thumbnail" + File.separator + filePath.toFile().getPath() + ".jpeg";
+        String placeToSave = parentDirectory.toFile().getPath() + "Thumbnail" + File.separator + filePath.toFile().getName() + ".jpeg";
         File folder = new File(parentDirectory.toFile().getPath() + "Thumbnail");
         if (!folder.exists()) {
             folder.mkdir();

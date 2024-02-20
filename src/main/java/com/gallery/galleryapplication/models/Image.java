@@ -5,7 +5,9 @@ import com.gallery.galleryapplication.models.Interfaces.ThumbnailProvider;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Fetch;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.repository.cdi.Eager;
 
 import java.util.Date;
 import java.util.List;
@@ -19,7 +21,7 @@ public class Image implements ThumbnailProvider, ImageProvider {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},fetch = FetchType.EAGER)
     @JoinTable(
             name = "Image_Tag",
             joinColumns = @JoinColumn(name = "image_id"),

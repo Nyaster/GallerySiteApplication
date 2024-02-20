@@ -26,7 +26,7 @@ public class TagService {
     }
     @Transactional
     public List<Tag> findTagsByNameLikeIgnoreCase(String tag) {
-        return tagRepository.findTagsByNameStartsWith(tag);
+        return tagRepository.findTagsByNameContainsIgnoreCase(tag);
     }
     public String getAllInStrin(){
         return tagRepository.findAll().stream().map(Tag::getName).reduce((x,y)->x+","+y).orElse("");

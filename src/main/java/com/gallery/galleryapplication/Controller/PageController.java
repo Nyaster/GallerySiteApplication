@@ -42,8 +42,7 @@ public class PageController {
     public String redirectToImages(){
         return "redirect:/image";
     }
-    @GetMapping("/image"
-    )
+    @GetMapping("/image")
     public String indexPage(Model model, @RequestParam(required = false) String keyword, @RequestParam(defaultValue = "1") int page) {
         Pageable paging = PageRequest.of(page - 1, PAGESIZE, Sort.by("creationDate").descending().and(Sort.by("mediaId").descending()));
         Page<Image> pages;
@@ -88,11 +87,23 @@ public class PageController {
         return "edit";
     }
     private void prepareModelForEditPage(Model model, String apiType, int id){
-        Optional<? extends ThumbnailProvider> image = apiType.equalsIgnoreCase("image") ? imageService.getByMediaId(id) : fanImageService.getById(id);
+        Optional<? extends ImageProvider> image = apiType.equalsIgnoreCase("image") ? imageService.getByMediaId(id) : fanImageService.getById(id);
         String tags = tagService.getAllInStrin();
         model.addAttribute("image",image.get());
         model.addAttribute("initialWhitelist",tags);
+        model.addAttribute("tags",image.get().getTags());
+        image.get().getTags().forEach(x-> System.out.println(x.getName()));
         model.addAttribute("apiType",apiType);
+    }
+    @GetMapping("api/image/{id}/show")
+    public String showPage(@PathVariable Integer id, Model model){
+        prepareModelForEditPage(model,"image",id);
+        return "show";
+    }
+    @GetMapping("api/fan-images/{id}/show")
+    public String showFanImagesPage(@PathVariable Integer id, Model model){
+        prepareModelForEditPage(model,"fan-images",id);
+        return "show";
     }
 
 

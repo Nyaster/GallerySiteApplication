@@ -2,16 +2,57 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Registration Page</title>
+    <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+            rel="stylesheet"
+    />
+    <!-- Google Fonts -->
+    <link
+            href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+            rel="stylesheet"
+    />
+    <!-- MDB -->
+    <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css"
+            rel="stylesheet"
+    />
+    <link rel="stylesheet" th:href="@{/styles/login.css}" href="login.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" sizes="16x16" th:href="@{/favicons/favicon-16x16.png}">
 </head>
-<body>
-<form  th:method="POST" th:action="@{/auth/registration}" th:object="${person}">
-    <label for="username">Input login:</label>
-    <input type="text" th:field="*{login}" id="username">
-    <label for="password">Input password:</label>
-    <input type="password" th:field="*{password}" id="password">
-    <input type="submit" value="Sign">
+<body class="d-flex">
 
-</form>
+<div class="container text-center align-self-center">
+    <div class="row justify-content-center ">
+        <div class="col col-md-auto  rounded">
+            <div class="card">
+                <div class="card-header">Registration</div>
+                <div class="card-body">
+                    <div class="error_Message" th:if="${param.error}">
+                        Invalid username and password.
+                    </div>
+                    <div class="error_Message" th:if="${param.logout}">
+                        You have been logged out.
+                    </div>
+                    <form th:method="POST" th:action="@{/auth/registration}" th:object="${person}">
+                        <div class="form-floating">
+                            <input class="form-control" type="text" name="username" placeholder="login"
+                                   th:field="*{login}" id="username">
+                            <label class="form-label" for="username">Login:</label>
+                        </div>
+                        <div class="form-floating">
+                            <input class="form-control" type="password" name="password" placeholder="password"
+                                   th:field="*{password}" id="password">
+                            <label class="form-label" for="password"> Password:</label>
+                        </div>
+                        <input class="btn btn-dark btn-block" type="submit" value="Sign in"/>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>

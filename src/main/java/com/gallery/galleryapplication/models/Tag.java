@@ -1,5 +1,6 @@
 package com.gallery.galleryapplication.models;
 
+import com.gallery.galleryapplication.models.enums.TagGroup;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,6 +24,8 @@ public class Tag {
     private List<Image> images;
     @ManyToMany(mappedBy = "tags", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private List<FanArtImage> fanArtImages;
+    @Enumerated(EnumType.STRING)
+    private TagGroup tagGroup;
 
     public Tag(String val) {
         this.name = val;

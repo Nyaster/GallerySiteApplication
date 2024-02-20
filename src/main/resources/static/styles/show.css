@@ -1,0 +1,6 @@
+.tag-list{
+    list-style: none;
+}
+.tag-list>li{
+    padding-left: 10%;
+}

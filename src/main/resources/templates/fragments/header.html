@@ -5,6 +5,12 @@
             <li th:if="${#authentication.getAuthorities().stream().findFirst().get().getAuthority().equals('ROLE_ADMIN')}" class="nav-item ">
                 <a class="nav-link"  href="/admin">Admin Panel</a>
             </li>
+           <!-- <li class="nav-item" >
+                <div class="form-switch nav-link">
+                    <input  class="form-check-input" style="margin-left: 0" type="checkbox" role="switch" id="flexSwitchCheckDefault" onclick="changeTheme()" />
+                    <label  class="form-check-label" for="flexSwitchCheckDefault">Switch theme</label>
+                </div>
+            </li>-->
             <li class="nav-item ">
                 <a class="nav-link"  href="/image">Images</a>
             </li>
@@ -19,6 +25,13 @@
                     <input class="nav-link" type="submit" value="Logout">
                 </form>
             </li>
+
         </ul>
     </nav>
+    <script>
+        function changeTheme(){
+            var body = document.querySelector("body");
+            body.getAttribute("data-mdb-theme") === "dark" ? body.setAttribute("data-mdb-theme","light"):body.setAttribute("data-mdb-theme","dark");
+        }
+    </script>
 </header>

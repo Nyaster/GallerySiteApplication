@@ -68,6 +68,7 @@ public class RequestPageAnalyzer {
 
     public void analyzeRequestPages() throws IOException {
         int pageLimit = getPageLimit();
+        pageLimit = 3;
         for (int j = 1; j <= pageLimit; j++) {
             Elements elements = getElements(j);
             List<Image> requestImageModels = null;

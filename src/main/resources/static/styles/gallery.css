@@ -27,3 +27,7 @@
         flex-wrap: wrap;
     }
 }
+:root{
+    --tagify-dd-color-primary:var(--mdb-black);
+    --tagify-dd-bg-color:var(--mdb-black);
+}
