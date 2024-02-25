@@ -43,7 +43,7 @@ public class CustomAuthenteficationSuccesHandler implements AuthenticationSucces
         logEntry.setUserName(username);
         logEntry.setLogText(browser);
         logEntryService.saveLog(logEntry);
-        response.sendRedirect("/");
+        response.sendRedirect(request.getRequestURI());
     }
 
     private String getClientId(HttpServletRequest request) {

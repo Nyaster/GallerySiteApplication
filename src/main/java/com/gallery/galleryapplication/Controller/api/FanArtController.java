@@ -58,7 +58,7 @@ public class FanArtController {
     }
 
     @PostMapping("/{id}")
-    public ResponseEntity<String> SaveEditTags(@PathVariable Integer id, @RequestBody List<TagsDDO> tagsDDO) {
+    public ResponseEntity SaveEditTags(@PathVariable Integer id, @RequestBody List<TagsDDO> tagsDDO) {
         List<Tag> tagsSet = tagsDDO.stream().map(x -> {
             Tag tag = new Tag();
             tag.setName(x.getValue().toLowerCase());
@@ -75,7 +75,13 @@ public class FanArtController {
             tagService.addNewTags(tagsSet);
         }
         try {
-            newOriginalTags.forEach(x -> x.setId(allTags.stream().filter(j -> j.getName().equalsIgnoreCase(x.getName())).map(Tag::getId).findAny().orElseThrow()));
+            newOriginalTags.forEach(x -> {
+                Tag finalX = x;
+                Tag tag = allTags.stream().filter(j -> j.getName().equalsIgnoreCase(finalX.getName())).findAny().orElseThrow();
+                x.setTagGroup(tag.getTagGroup());
+                x.setId(tag.getId());
+                x.setName(x.getName());
+            });
         } catch (NoSuchElementException e) {
             return ResponseEntity.badRequest().body("Something happened while saving tags");
         }

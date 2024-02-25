@@ -70,7 +70,13 @@ public class ImageController {
             return ResponseEntity.badRequest().body("Error in length tags");
         }
         try {
-            newOriginalTags.forEach(x -> x.setId(allTags.stream().filter(j -> j.getName().equalsIgnoreCase(x.getName())).map(Tag::getId).findAny().orElseThrow()));
+            newOriginalTags.forEach(x -> {
+                Tag finalX = x;
+                Tag tag = allTags.stream().filter(j -> j.getName().equalsIgnoreCase(finalX.getName())).findAny().orElseThrow();
+                x.setTagGroup(tag.getTagGroup());
+                x.setId(tag.getId());
+                x.setName(x.getName());
+            });
         } catch (NoSuchElementException e) {
             return ResponseEntity.badRequest().body("Something happened while saving tags");
         }

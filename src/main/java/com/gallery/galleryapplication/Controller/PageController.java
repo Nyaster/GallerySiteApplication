@@ -92,7 +92,6 @@ public class PageController {
         model.addAttribute("image",image.get());
         model.addAttribute("initialWhitelist",tags);
         model.addAttribute("tags",image.get().getTags());
-        image.get().getTags().forEach(x-> System.out.println(x.getName()));
         model.addAttribute("apiType",apiType);
     }
     @GetMapping("api/image/{id}/show")
