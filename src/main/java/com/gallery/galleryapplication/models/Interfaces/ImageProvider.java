@@ -8,4 +8,5 @@ public interface ImageProvider {
     public int getMediaId();
     public String getTagsInString();
     public List<Tag> getTags();
+    public double[] getEmbedding();
 }

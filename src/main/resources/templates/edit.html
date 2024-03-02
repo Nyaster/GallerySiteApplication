@@ -64,7 +64,6 @@
             </form>
         </div>
     </div>
-    <button onclick="notif()">temp</button>
 </section>
 <script src="/javascript/notify.js"></script>
 <script th:inline="javascript">
@@ -103,9 +102,6 @@
             .catch((error) => {
                 console.error('Error:', error);
             });
-    }
-    function notif(){
-        $.notify("Hello world");
     }
 </script>
 </body>

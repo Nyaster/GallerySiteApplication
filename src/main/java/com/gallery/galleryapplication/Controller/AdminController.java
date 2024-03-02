@@ -2,6 +2,7 @@ package com.gallery.galleryapplication.Controller;
 
 import com.gallery.galleryapplication.services.FanImageService;
 import com.gallery.galleryapplication.services.ImageService;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -36,14 +37,20 @@ public class AdminController {
                 case "scan_images" -> fanImageService.scanImagesFromFolder();
                 case "download_images" -> imageService.analyzeRequestPages();
                 case "check_updates" -> imageService.checkUpdates();
+                case "import_images" -> fanImageService.importImages();
                 case null, default -> {
                     operationInProgress = false;
                     return ResponseEntity.badRequest().body("error");
                 }
             }
             return ResponseEntity.ok("Hi");
-        } finally {
+        }catch (Exception e){
+            e.printStackTrace();
+            LoggerFactory.getLogger(this.getClass()).error("WTF",e);
+        }
+        finally {
             operationInProgress = false;
+            return ResponseEntity.ok("Hi");
         }
     }
 

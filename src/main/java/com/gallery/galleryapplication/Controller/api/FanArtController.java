@@ -54,7 +54,7 @@ public class FanArtController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).cacheControl(CacheControl.maxAge(Duration.ofMinutes(5))).body(bytesFile);
+        return ResponseEntity.ok().contentType(MediaType.parseMediaType("image/webp")).cacheControl(CacheControl.maxAge(Duration.ofMinutes(5))).body(bytesFile);
     }
 
     @PostMapping("/{id}")

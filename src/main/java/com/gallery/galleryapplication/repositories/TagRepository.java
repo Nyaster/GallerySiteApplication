@@ -1,6 +1,7 @@
 package com.gallery.galleryapplication.repositories;
 
 import com.gallery.galleryapplication.models.Tag;
+import com.gallery.galleryapplication.models.enums.TagGroup;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,4 +16,5 @@ public interface TagRepository extends JpaRepository<Tag,Integer> {
 
     List<Tag> findTagsByNameStartsWith(String name);
     List<Tag> findTagsByNameContainsIgnoreCase(String name);
+    List<Tag> getTagsByTagGroup(TagGroup tagGroup);
 }

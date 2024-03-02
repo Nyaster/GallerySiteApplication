@@ -31,6 +31,10 @@ public class FanArtImage implements ThumbnailProvider, ImageProvider {
     private String pathToImageThumbnailOnDisc;
     @Transient
     private String tagsInString;
+    @Transient
+    private double[] embedding;
+    @Transient
+    private Double TemporalCousineSimiliraty;
 
     @Override
     public boolean equals(Object o) {

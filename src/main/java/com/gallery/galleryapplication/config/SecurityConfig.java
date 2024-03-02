@@ -37,31 +37,33 @@ public class SecurityConfig {
     @Bean
     static RoleHierarchy roleHierarchy() {
         RoleHierarchyImpl hierarchy = new RoleHierarchyImpl();
-        hierarchy.setHierarchy("ROLE_ADMIN > ROLE_EDITOR\n" +
-                "ROLE_EDITOR > ROLE_USER\n");
+        hierarchy.setHierarchy("ROLE_ADMIN > ROLE_EDITOR\n" + "ROLE_EDITOR > ROLE_USER\n");
         return hierarchy;
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http
-            , RememberMeServices services
-            , CustomAuthenteficationSuccesHandler customAuthenteficationSuccesHandler
-    ) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, RememberMeServices services, CustomAuthenteficationSuccesHandler customAuthenteficationSuccesHandler) throws Exception {
         //.requiresChannel(x->x.anyRequest().requiresSecure()) добавить что бы редирект
-        http
-                .portMapper(x -> x.http(httpPort).mapsTo(SSLport))
-                .formLogin(form -> form.loginPage("/auth/login").loginProcessingUrl("/auth/process_login")
+        http.portMapper(x -> x.http(httpPort).mapsTo(SSLport))
+                .formLogin(form -> form.loginPage("/auth/login")
+                        .loginProcessingUrl("/auth/process_login")
                         .defaultSuccessUrl("/")
                         .failureUrl("/auth/login?error")
                         .successHandler(customAuthenteficationSuccesHandler))
-                .logout(logout -> logout
-                        .logoutUrl("/auth/logout")
+                .logout(logout -> logout.logoutUrl("/auth/logout")
                         .logoutSuccessUrl("/auth/login?logout"))
-                .authorizeHttpRequests((authz) ->
-                        authz.requestMatchers("/favicons/**").permitAll().requestMatchers("/admin/**").hasRole("ADMIN")
-                                .requestMatchers("api/*/*/edit").hasRole("EDITOR")
-                                .requestMatchers("/auth/**", "/styles/**").permitAll().anyRequest().authenticated())
-                .rememberMe(x -> x.rememberMeServices(services).userDetailsService(personDetailService).authenticationSuccessHandler(customAuthenteficationSuccesHandler))
+                .authorizeHttpRequests((authz) -> authz.requestMatchers("/favicons/**")
+                        .permitAll().requestMatchers("/admin/**")
+                        .hasRole("ADMIN")
+                        .requestMatchers("api/*/*/edit")
+                        .hasRole("EDITOR")
+                        .requestMatchers("/auth/**", "/styles/**")
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated())
+                .rememberMe(x -> x.rememberMeServices(services)
+                        .userDetailsService(personDetailService)
+                        .authenticationSuccessHandler(customAuthenteficationSuccesHandler))
                 .httpBasic(withDefaults());
         return http.build();
     }

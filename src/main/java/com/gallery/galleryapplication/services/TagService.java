@@ -1,6 +1,7 @@
 package com.gallery.galleryapplication.services;
 
 import com.gallery.galleryapplication.models.Tag;
+import com.gallery.galleryapplication.models.enums.TagGroup;
 import com.gallery.galleryapplication.repositories.TagRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -34,5 +35,8 @@ public class TagService {
 
     public List<Tag> getAll() {
         return tagRepository.findAll();
+    }
+    public List<Tag> getImagesWithDesiredGroup(TagGroup group){
+       return tagRepository.getTagsByTagGroup(group);
     }
 }

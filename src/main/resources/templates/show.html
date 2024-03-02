@@ -5,7 +5,7 @@
     <title>Lesson in love gallery</title>
     <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
     <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css" />
+    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css"/>
     <link rel="stylesheet" th:href="@{/styles/show.css}">
     <link
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
@@ -36,15 +36,37 @@
             <div class="col-sm-12 col-md-2">
                 <ul class="tag-list">
                     <span class="marker-hidden"><li>Character:</li></span>
-                    <li th:each="tag:${tags}" th:text="${tag?.getName()}" th:if='${tag.getTagGroup() == T(com.gallery.galleryapplication.models.enums.TagGroup).CHARACTER}'></li>
+                    <li th:each="tag:${tags}" th:text="${tag?.getName()}"
+                        th:if='${tag.getTagGroup() == T(com.gallery.galleryapplication.models.enums.TagGroup).CHARACTER}'></li>
                     <span><li>Rating:</li></span>
-                    <li th:each="tag:${tags}" th:text="${tag?.getName()}" th:if='${tag?.getTagGroup() == T(com.gallery.galleryapplication.models.enums.TagGroup).RATING}'></li>
+                    <li th:each="tag:${tags}" th:text="${tag?.getName()}"
+                        th:if='${tag?.getTagGroup() == T(com.gallery.galleryapplication.models.enums.TagGroup).RATING}'></li>
                     <span><li>Misc:</li></span>
-                    <li th:each="tag:${tags}" th:text="${tag?.getName()}" th:if='${tag?.getTagGroup() == T(com.gallery.galleryapplication.models.enums.TagGroup).MISC}'></li>
+                    <li th:each="tag:${tags}" th:text="${tag?.getName()}"
+                        th:if='${tag?.getTagGroup() == T(com.gallery.galleryapplication.models.enums.TagGroup).MISC}'></li>
                 </ul>
             </div>
             <div class="col-sm-12 col-md-10 order-md-last order-first">
                 <img class="img-fluid" th:src="@{'/api/'+ ${apiType}+'/'+ ${image?.getMediaId()}}" alt="">
+            </div>
+        </div>
+        <br>
+        <h1>Similiar images</h1>
+        <div class="row g-2 row-cols-2 justify-content-center row-cols-md-4" >
+
+            <div class="col-lg-4 col-md-6 col-xs-12 mb-2" th:each="image : ${near}">
+                <div class="card" style="border-radius: 0">
+                    <a th:href="@{'/api/'+${apiType}+'/'+${image.getMediaId()}+'/show'}">
+                        <div class="overflow-hidden  image-box" style="border-radius: 0">
+                            <img style="border-radius: 0" class="card-img" srcset=""
+                                 th:src="@{'/api/'+${apiType}+'/' + ${image.getMediaId()}}"
+                                 src="../../../../image/18838.png/"></div>
+                        <!-- <div class="card-img-overlay hover-text-card">
+                             <p th:text="${image.getTagsInString()}"></p>
+                         </div>-->
+                    </a>
+
+                </div>
             </div>
         </div>
     </div>

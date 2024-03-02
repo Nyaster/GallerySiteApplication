@@ -44,6 +44,8 @@ public class Image implements ThumbnailProvider, ImageProvider {
     private String pathToImageThumbnailOnDisc;
     @Transient
     private String tagsInString;
+    @Transient
+    private double[] embedding;
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

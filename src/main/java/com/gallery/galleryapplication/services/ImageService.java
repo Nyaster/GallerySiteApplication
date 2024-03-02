@@ -5,6 +5,7 @@ import com.gallery.galleryapplication.models.Interfaces.ThumbnailProvider;
 import com.gallery.galleryapplication.models.Tag;
 import com.gallery.galleryapplication.repositories.ImageRepository;
 import com.gallery.galleryapplication.repositories.TagRepository;
+import com.gallery.galleryapplication.util.ImageImporter;
 import com.gallery.galleryapplication.util.LessonInLoveDonwloader.RequestPageAnalyzer;
 import com.gallery.galleryapplication.util.ThumbNailUtilities;
 import jakarta.annotation.PostConstruct;
@@ -29,12 +30,14 @@ public class ImageService {
     private final TagRepository tagRepository;
     private final ThumbNailUtilities thumbNailUtilities;
     private final RequestPageAnalyzer requestPageAnalyzer;
+    private final ImageImporter imageImporter;
     @Autowired
-    public ImageService(ImageRepository imageRepository, TagRepository tagRepository, ThumbNailUtilities thumbNailUtilities, RequestPageAnalyzer requestPageAnalyzer) {
+    public ImageService(ImageRepository imageRepository, TagRepository tagRepository, ThumbNailUtilities thumbNailUtilities, RequestPageAnalyzer requestPageAnalyzer, ImageImporter imageImporter) {
         this.imageRepository = imageRepository;
         this.tagRepository = tagRepository;
         this.thumbNailUtilities = thumbNailUtilities;
         this.requestPageAnalyzer = requestPageAnalyzer;
+        this.imageImporter = imageImporter;
     }
 
     public Page<Image> imageList(Integer page) {
@@ -78,6 +81,7 @@ public class ImageService {
         } else {
             pageable = imageRepository.findAllExcludingNSFW(paging);
         }
+
         return pageable;
     }
 
@@ -130,4 +134,6 @@ public class ImageService {
             LoggerFactory.getLogger(this.getClass()).error("Error while cheking update");
         }
     }
+
+
 }

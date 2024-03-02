@@ -153,7 +153,6 @@ public class RequestPageAnalyzer {
         image.setMediaId(Integer.parseInt(mediaId));
         image.setCreationDate(simpleDateFormat.parse(date));
         image.setTags(Tag.createTagsFromList(Stream.of(tags.split(",")).map(x -> x.toLowerCase().trim()).toList()));
-        image.setAuthor(author);
         return image;
     }
 
