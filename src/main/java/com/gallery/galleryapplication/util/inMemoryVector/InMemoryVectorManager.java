@@ -1,5 +1,6 @@
 package com.gallery.galleryapplication.util.inMemoryVector;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -10,16 +11,16 @@ import java.util.Map;
 @Service
 public class InMemoryVectorManager {
     final private String DBNAME = "vectors.json";
-    private Map<Integer, double[]> vectorDb;
+    private Map<Integer, float[]> vectorDb;
 
-    public void putIntoVectorIntoDb(Integer id, double[] vector) {
+    public void putIntoVectorIntoDb(Integer id, float[] vector) {
         if (vectorDb == null) {
             vectorDb = new HashMap<>();
         }
         vectorDb.put(id, vector);
     }
 
-    public double[] getVectorFromDb(Integer id) {
+    public float[] getVectorFromDb(Integer id) {
         if (vectorDb == null) {
             readFromDisk();
         }
@@ -46,11 +47,11 @@ public class InMemoryVectorManager {
     }
 
     public void readFromDisk() {
-        Map<Integer, double[]> tempDB = new HashMap<>();
+        Map<Integer, float[]> tempDB = new HashMap<>();
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("." + File.separator + DBNAME))) {
-            tempDB = (Map<Integer, double[]>) ois.readObject();
+            tempDB = (Map<Integer, float[]>) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            LoggerFactory.getLogger(this.getClass()).info("File not found, create new File");
         }
        /* ObjectMapper objectMapper = new ObjectMapper();
         Map<Integer, double[]> tempDB = new HashMap<>();

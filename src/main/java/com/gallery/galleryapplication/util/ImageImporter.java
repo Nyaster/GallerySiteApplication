@@ -4,11 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gallery.galleryapplication.models.Author;
 import com.gallery.galleryapplication.models.FanArtImage;
-import com.gallery.galleryapplication.models.Image;
 import com.gallery.galleryapplication.services.AuthorService;
-import com.gallery.galleryapplication.services.FanImageService;
 import com.gallery.galleryapplication.util.inMemoryVector.InMemoryVectorManager;
-import org.apache.commons.math3.linear.ArrayRealVector;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 @Component
 public class ImageImporter {
     private final AuthorService authorService;
@@ -64,10 +62,10 @@ public class ImageImporter {
                 LoggerFactory.getLogger(this.getClass()).error("Error while parsing date", e);
                 throw new RuntimeException(e);
             }
-            image.setAuthor(allAuthor.stream().filter(j->j.getName().equalsIgnoreCase(x.get("author").asText())).findAny().get());
+            image.setAuthor(allAuthor.stream().filter(j -> j.getName().equalsIgnoreCase(x.get("author").asText())).findAny().get());
             image.setPathToFileOnDisc(x.get("file_path").asText());
             image.setTags(new ArrayList<>());
-            double[] embeddings = convertJsonNodeArrayToDoubleArray(x.get("embedding").get(0));
+            float[] embeddings = convertJsonNodeArrayToDoubleArray(x.get("embedding").get(0));
             image.setEmbedding(embeddings);
             FanArtImage temp = moveFileToCorrectFolder(image);
             return temp;
@@ -87,18 +85,18 @@ public class ImageImporter {
         } else {
             pathToFanFolder = Path.of("./imageFanArts/" + image.getAuthor().getName());
             File file = pathToFanFolder.toFile();
-            if (!file.exists()){
+            if (!file.exists()) {
                 file.mkdir();
             }
         }
         try {
-            Path source = Path.of("./import/"+image.getPathToFileOnDisc().substring(1));
+            Path source = Path.of("./import/" + image.getPathToFileOnDisc().substring(1));
             Path target = Path.of(pathToFanFolder.toFile().getPath() + "/" + source.getFileName());
-            if (target.toFile().exists()){
+            if (target.toFile().exists()) {
                 image.setPathToFileOnDisc(target.toFile().getPath());
                 return image;
             }
-            Files.copy(source,target);
+            Files.copy(source, target);
 
         } catch (IOException e) {
             LoggerFactory.getLogger(this.getClass()).error("Error while parsing date", e);
@@ -107,15 +105,16 @@ public class ImageImporter {
 
         return image;
     }
-    public double[] convertJsonNodeArrayToDoubleArray(JsonNode jsonNodes) {
+
+    public float[] convertJsonNodeArrayToDoubleArray(JsonNode jsonNodes) {
         if (jsonNodes == null || jsonNodes.size() == 0) {
-            return new double[0]; // Return empty array if input is null or empty
+            return new float[0]; // Return empty array if input is null or empty
         }
 
-        double[] doubleArray = new double[jsonNodes.size()];
+        float[] doubleArray = new float[jsonNodes.size()];
         for (int i = 0; i < jsonNodes.size(); i++) {
             JsonNode node = jsonNodes.get(i);
-            doubleArray[i] = node != null ? node.asDouble() : 0.0; // Set default value to 0.0 if node is null
+            doubleArray[i] = node != null ? ((float) node.asDouble()) : 0.0F; // Set default value to 0.0 if node is null
         }
 
         return doubleArray;

@@ -32,9 +32,14 @@ public class FanArtImage implements ThumbnailProvider, ImageProvider {
     @Transient
     private String tagsInString;
     @Transient
-    private double[] embedding;
+    private float[] embedding;
     @Transient
     private Double TemporalCousineSimiliraty;
+    @ManyToOne
+    @JoinColumn(name = "created_by_id")
+    private Person createdBy;
+    private boolean isVisible;
+    private String sha256;
 
     @Override
     public boolean equals(Object o) {

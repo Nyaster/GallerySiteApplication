@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lesson in love gallery</title>
+    <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+            rel="stylesheet"
+    />
+    <!-- Google Fonts -->
+    <link
+            href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+            rel="stylesheet"
+    />
+    <!-- MDB -->
+    <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css"
+            rel="stylesheet"
+    />
+    <link rel="stylesheet" th:href="@{/styles/gallery.css}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css"/>
+    <!-- MDB -->
+    <link rel="stylesheet" th:href="@{/styles/edit.css}">
+    <link rel="icon" type="image/png" sizes="16x16" th:href="@{/favicons/favicon-16x16.png}">
+</head>
+<body data-bs-theme="dark" data-mdb-theme="dark">
+<header th:replace="~{fragments/header :: header('temp')}" >
+    <nav class="navbar bg-body-tertiary justify-content-end">
+        <ul class="nav ">
+            <li class="nav-item ">
+                <a class="nav-link" th:if="${personDetails == null}" href="auth/login">login</a>
+            </li>
+            <li class="nav-item">
+                <form th:action="@{/auth/logout}" method="post">
+                    <input class="nav-link" type="submit" value="Logout">
+                </form>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<div class="container mt-5 p-5">
+    <h4 class="mb-4 text-success" style="font-weight: 700; font-family:
+    'Times New Roman', Times, serif;">Spring MVC - Multiple File Upload with Progress Bar in Ajax and JQuery</h4>
+
+    <form id="uploadForm" class="form-control p-5 mt-5">
+        <div class="mb-3">
+            <label for="fileInput" class="form-label" style="font-weight: 600;">Select Files</label>
+            <input type="file" class="form-control" id="fileInput" name="file">
+        </div>
+        <button type="button" class="btn btn-success mt-2" onclick="uploadFiles()">Upload</button>
+    </form>
+
+    <div id="progressBarContainer" class="mt-4" style="display: none;">
+        <div class="progress">
+            <div id="progressBar" class="progress-bar bg-success" role="progressbar"
+                 style="width: 100%;"></div>
+        </div>
+    </div>
+    <div th:class="${_csrf.getToken()}"></div>
+</div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var uploadUrl = /*[[@{/fan-images/upload}]]*/ '/fan-arts/upload'; // Use Thymeleaf to generate the URL
+    var csref = [[${_csrf.getToken()}]];
+
+    function uploadFiles() {
+        var files = $('#fileInput')[0].files;
+
+        if (files.length === 0) {
+            alert("Please select at least one file.");
+            return;
+        }
+
+        var formData = new FormData();
+        for (var i = 0; i < files.length; i++) {
+            formData.append('files', files[i]);
+        }
+
+        $.ajax({
+            url: uploadUrl,
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            headers:{
+                'X-CSRF-TOKEN':csref
+            },
+            xhr: function () {
+                var xhr = new XMLHttpRequest();
+                xhr.upload.onprogress = function (e) {
+                    if (e.lengthComputable) {
+                        var percentage = (e.loaded / e.total) * 100;
+                        $('#progressBar').width(percentage + '%').html(percentage.toFixed(2) + '%');
+                    }
+                };
+                return xhr;
+            },
+            success: function (response) {
+                window.location.href = "/api/fan-images/"+response+"/edit"
+                $('#progressBarContainer').hide();
+            },
+            error: function (error) {
+                alert('Error uploading files: ' + error.responseText);
+            }
+        });
+
+        $('#progressBarContainer').show();
+    }
+    /*]]>*/
+</script>
+</body>
+</html>

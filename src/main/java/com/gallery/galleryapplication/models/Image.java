@@ -45,7 +45,10 @@ public class Image implements ThumbnailProvider, ImageProvider {
     @Transient
     private String tagsInString;
     @Transient
-    private double[] embedding;
+    private float[] embedding;
+    @ManyToOne
+    @JoinColumn(name = "created_by_id")
+    private Person createdBy;
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

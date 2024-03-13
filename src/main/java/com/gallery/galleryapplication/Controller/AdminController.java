@@ -2,6 +2,8 @@ package com.gallery.galleryapplication.Controller;
 
 import com.gallery.galleryapplication.services.FanImageService;
 import com.gallery.galleryapplication.services.ImageService;
+import com.gallery.galleryapplication.util.ONNXRuntime;
+import com.gallery.galleryapplication.util.inMemoryVector.InMemoryVectorManager;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,11 +16,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class AdminController {
     final ImageService imageService;
     final FanImageService fanImageService;
+    private final ONNXRuntime onnxRuntime;
     private volatile boolean operationInProgress = false;
 
-    public AdminController(ImageService imageService, FanImageService fanImageService) {
+    public AdminController(ImageService imageService, FanImageService fanImageService, ONNXRuntime onnxRuntime) {
         this.imageService = imageService;
         this.fanImageService = fanImageService;
+        this.onnxRuntime = onnxRuntime;
     }
 
     @GetMapping("/admin")
@@ -38,6 +42,7 @@ public class AdminController {
                 case "download_images" -> imageService.analyzeRequestPages();
                 case "check_updates" -> imageService.checkUpdates();
                 case "import_images" -> fanImageService.importImages();
+                case "generate_embeddings" -> onnxRuntime.generateEmbeedings(fanImageService.getAll());
                 case null, default -> {
                     operationInProgress = false;
                     return ResponseEntity.badRequest().body("error");

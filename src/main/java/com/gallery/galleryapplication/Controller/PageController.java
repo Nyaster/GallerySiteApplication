@@ -25,9 +25,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Controller
 public class PageController {
@@ -95,6 +93,10 @@ public class PageController {
     @GetMapping("api/fan-images/{id}/edit")
     public String getEditFanArtPage(@PathVariable Integer id, Model model) {
         prepareModelForEditPage(model, "fan-images", id);
+        List<FanArtImage> imagesWithoutTags = fanImageService.getImagesWithoutTags();
+        imagesWithoutTags.remove(model.getAttribute("image"));
+        Collections.shuffle(imagesWithoutTags);
+        model.addAttribute("randomImage", imagesWithoutTags.stream().findAny().get());
         return "edit";
     }
 
@@ -112,7 +114,6 @@ public class PageController {
     @GetMapping("api/image/{id}/show")
     public String showPage(@PathVariable Integer id, Model model) {
         prepareModelForEditPage(model, "image", id);
-
         return "show";
     }
 
@@ -121,27 +122,40 @@ public class PageController {
         prepareModelForEditPage(model, "fan-images", id);
         FanArtImage image = (FanArtImage) model.getAttribute("image");
         image.setEmbedding(inMemoryVectorManager.getVectorFromDb(image.getId()));
+        if (image.getEmbedding() == null) {
+            model.addAttribute("near", new ArrayList<FanArtImage>());
+            return "show";
+        }
         List<FanArtImage> all = fanImageService.getAll();
         all.remove(image);
         all.forEach(x -> x.setEmbedding(inMemoryVectorManager.getVectorFromDb(x.getId())));
-        all.parallelStream().forEach((fanImage -> {
-            double temp = testSpeed(fanImage.getEmbedding(), image.getEmbedding());
+        all.parallelStream().filter(x -> x.getEmbedding() != null).forEach((fanImage -> {
+            double temp = cosinusDistance(fanImage.getEmbedding(), image.getEmbedding());
             fanImage.setTemporalCousineSimiliraty(temp);
         }));
-
-        List<FanArtImage> list = all.stream().sorted(Comparator.comparing(FanArtImage::getTemporalCousineSimiliraty)).limit(12).toList();
+        List<FanArtImage> list = all.stream().filter(x -> x.getEmbedding() != null).sorted(Comparator.comparing(FanArtImage::getTemporalCousineSimiliraty)).limit(24).toList();
         model.addAttribute("near", list);
         return "show";
     }
 
 
-    double testSpeed(double[] vectorA, double[] vectorB) {
-        ArrayRealVector arrayRealVectorA = new ArrayRealVector(vectorA);
-        ArrayRealVector arrayRealVectorB = new ArrayRealVector(vectorB);
+    double cosinusDistance(float[] vectorA, float[] vectorB) {
+        double[] doubles = floatToDouble(vectorA);
+        double[] doubles2 = floatToDouble(vectorB);
+        ArrayRealVector arrayRealVectorA = new ArrayRealVector(doubles);
+        ArrayRealVector arrayRealVectorB = new ArrayRealVector(doubles2);
         double dotProduct = arrayRealVectorA.dotProduct(arrayRealVectorB);
         double otherNorm = arrayRealVectorA.getNorm();
         double imageNorm = arrayRealVectorB.getNorm();
         double similiraty = dotProduct / (imageNorm * otherNorm);
-        return 1-similiraty;
+        return 1 - similiraty;
+    }
+
+    private double[] floatToDouble(float[] vector) {
+        double[] result = new double[vector.length];
+        for (int i = 0; i < vector.length; i++) {
+            result[i] = vector[i];
+        }
+        return result;
     }
 }

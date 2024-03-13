@@ -42,10 +42,10 @@ public class FanImageService {
     }
 
     public Page<FanArtImage> getAll(Pageable paging, boolean b) {
-        Page<FanArtImage> all = fanArtImageRepository.findAll(paging);
+        Page<FanArtImage> all = fanArtImageRepository.findByIsVisibleTrue(paging);
         List<FanArtImage> thumbnailsAndUpdateImage = (List<FanArtImage>) thumbNailUtilities.createThumbnailsAndUpdateImage(all.getContent());
         fanArtImageRepository.saveAll(thumbnailsAndUpdateImage);
-        all = fanArtImageRepository.findAll(paging);
+        all = fanArtImageRepository.findByIsVisibleTrue(paging);
         return all;
     }
 
@@ -56,7 +56,7 @@ public class FanImageService {
         Page<FanArtImage> all = fanArtImageRepository.findImagesByAllGivenTags(searchTags, (long) searchTags.size(), paging);
         List<FanArtImage> thumbnailsAndUpdateImage = (List<FanArtImage>) thumbNailUtilities.createThumbnailsAndUpdateImage(all.getContent());
         fanArtImageRepository.saveAll(thumbnailsAndUpdateImage);
-        all = fanArtImageRepository.findAll(paging);
+        all = fanArtImageRepository.findByIsVisibleTrue(paging);
         return all;
     }
 
@@ -90,8 +90,15 @@ public class FanImageService {
         HashSet<FanArtImage> entities = new HashSet<>(list);
         fanArtImageRepository.saveAll(entities);
     }
+    public FanArtImage saveFanImage(FanArtImage fanArtImage){
+        fanArtImageRepository.save(fanArtImage);
+        return fanArtImage;
+    }
+    public List<FanArtImage> getImagesWithoutTags(){
+        return fanArtImageRepository.findByTagsNullOrTagsEmpty();
+    }
 
     public List<FanArtImage> getAll() {
-        return fanArtImageRepository.findAll();
+        return fanArtImageRepository.findByIsVisibleTrue();
     }
 }

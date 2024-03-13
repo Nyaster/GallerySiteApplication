@@ -47,7 +47,6 @@ public class SecurityConfig {
         http.portMapper(x -> x.http(httpPort).mapsTo(SSLport))
                 .formLogin(form -> form.loginPage("/auth/login")
                         .loginProcessingUrl("/auth/process_login")
-                        .defaultSuccessUrl("/")
                         .failureUrl("/auth/login?error")
                         .successHandler(customAuthenteficationSuccesHandler))
                 .logout(logout -> logout.logoutUrl("/auth/logout")
@@ -61,8 +60,7 @@ public class SecurityConfig {
                         .permitAll()
                         .anyRequest()
                         .authenticated())
-                .rememberMe(x -> x.rememberMeServices(services)
-                        .userDetailsService(personDetailService)
+                .rememberMe(x -> x.rememberMeServices(services).userDetailsService(personDetailService)
                         .authenticationSuccessHandler(customAuthenteficationSuccesHandler))
                 .httpBasic(withDefaults());
         return http.build();

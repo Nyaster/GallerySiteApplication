@@ -31,8 +31,7 @@
     <link rel="icon" type="image/png" sizes="16x16" th:href="@{/favicons/favicon-16x16.png}">
 </head>
 <body data-bs-theme="dark" data-mdb-theme="dark">
-<script th:src="@{/javascript/stolen.js}"></script>
-<header th:replace="~{fragments/header :: header('temp')}" >
+<header th:replace="~{fragments/header :: header('temp')}">
     <nav class="navbar bg-body-tertiary justify-content-end">
         <ul class="nav ">
             <li class="nav-item ">
@@ -48,22 +47,29 @@
 </header>
 
 <section class="main-text">
-    <div class="container">
+    <div class="container-fluid">
         <div class="row">
-            <img class="" th:src="@{'/api/'+ ${apiType}+'/'+ ${image?.getMediaId()}}">
-        </div>
-        <div class="row">
-            <form th:action="@{'/api/'+${apiType}+'/'+${image?.getMediaId()}}" th:method="post">
-                <div class="col-13">
-                    <div id="liveAlertPlaceholder"></div>
-                    <input class="form-control" type="text" name="tags" id="tags" th:value="${image?.getTagsInString()}">
+            <div class="col-3">
+                <div class="row">
+                    <form th:action="@{'/api/'+${apiType}+'/'+${image?.getMediaId()}}" th:method="post">
+                        <div class="col-auto">
+                            <div id="liveAlertPlaceholder"></div>
+                            <input class="form-control" type="text" name="tags" id="tags"
+                                   th:value="${image?.getTagsInString()}">
+                        </div>
+                        <div class="col-auto">
+                            <input type="button" onclick="submitForm()" value="Submit" class="form-control btn"
+                                   id="liveAlertBtn">
+                            <a class="form-control btn" type="button"
+                               th:href="@{'/api/'+${apiType}+'/'+${randomImage?.getMediaId()}+'/edit'}">Next</a>
+                        </div>
+                    </form>
                 </div>
-                <div class="col-auto">
-                    <input type="button" onclick="submitForm()" value="Submit" class="form-control" id="liveAlertBtn">
-                </div>
-            </form>
+            </div>
+            <div class="col-9">
+                <img class="img" th:src="@{'/api/'+ ${apiType}+'/'+ ${image?.getMediaId()}}">
+            </div>
         </div>
-    </div>
 </section>
 <script src="/javascript/notify.js"></script>
 <script th:inline="javascript">
@@ -71,8 +77,8 @@
     let inputElement = document.querySelector("#tags"),
         tagify = new Tagify(inputElement, {
             enforceWhitelist: true,
-            autocomplete:{
-                tabKey:true
+            autocomplete: {
+                tabKey: true
             },
             whitelist: tags.split(","),
             dropdown: {
@@ -84,20 +90,21 @@
                 highlightFirst: true
             }
         });
+
     function submitForm() {
         let temp = [[${apiType}]];
-        let apiAddr = '/api/'+temp+ '/[[${image.getMediaId()}]]';
+        let apiAddr = '/api/' + temp + '/[[${image.getMediaId()}]]';
         let csref = document.querySelector('form > input[name="_csrf"]').value
         fetch(apiAddr, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN':csref
+                'X-CSRF-TOKEN': csref
             },
             body: tagify.getInputValue()
         })
             .then(data => {
-                data.text().then(x=>$.notify(x));
+                data.text().then(x => $.notify(x));
             })
             .catch((error) => {
                 console.error('Error:', error);
