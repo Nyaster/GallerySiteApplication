@@ -17,6 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -45,21 +47,22 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http, RememberMeServices services, CustomAuthenteficationSuccesHandler customAuthenteficationSuccesHandler) throws Exception {
         //.requiresChannel(x->x.anyRequest().requiresSecure()) добавить что бы редирект
         http.portMapper(x -> x.http(httpPort).mapsTo(SSLport))
-                .formLogin(form -> form.loginPage("/auth/login")
-                        .loginProcessingUrl("/auth/process_login")
-                        .failureUrl("/auth/login?error")
-                        .successHandler(customAuthenteficationSuccesHandler))
-                .logout(logout -> logout.logoutUrl("/auth/logout")
-                        .logoutSuccessUrl("/auth/login?logout"))
+
                 .authorizeHttpRequests((authz) -> authz.requestMatchers("/favicons/**")
                         .permitAll().requestMatchers("/admin/**")
                         .hasRole("ADMIN")
-                        .requestMatchers("api/*/*/edit","fan-images/upload")
+                        .requestMatchers("api/*/*/edit", "fan-images/upload")
                         .hasAnyRole("UPLOADER")
                         .requestMatchers("/auth/**", "/styles/**")
                         .permitAll()
                         .anyRequest()
                         .authenticated())
+                .formLogin(form -> form.loginPage("/auth/login").permitAll()
+                        .loginProcessingUrl("/auth/process_login")
+                        .failureUrl("/auth/login?error")
+                        .successHandler(customAuthenteficationSuccesHandler))
+                .logout(logout -> logout.logoutUrl("/auth/logout").permitAll()
+                        .logoutSuccessUrl("/auth/login?logout"))
                 .rememberMe(x -> x.rememberMeServices(services).userDetailsService(personDetailService)
                         .authenticationSuccessHandler(customAuthenteficationSuccesHandler))
                 .httpBasic(withDefaults());

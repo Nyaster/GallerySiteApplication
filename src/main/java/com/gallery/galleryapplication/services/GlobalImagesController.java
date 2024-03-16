@@ -4,25 +4,17 @@ import com.gallery.galleryapplication.models.Image;
 import com.gallery.galleryapplication.models.Tag;
 import com.gallery.galleryapplication.repositories.ImageRepository;
 import com.gallery.galleryapplication.repositories.TagRepository;
-import com.gallery.galleryapplication.util.ImageImporter;
 import com.gallery.galleryapplication.util.LessonInLoveDonwloader.RequestPageAnalyzer;
 import com.gallery.galleryapplication.util.ThumbNailUtilities;
-import jakarta.transaction.Transactional;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.nio.file.FileStore;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Service
-@Transactional
-public class ImageService {
+public class GlobalImagesController {
     public static final int WIDTH = 300;
     public static final int HEIGHT = 169;
     private final ImageRepository imageRepository;
@@ -30,16 +22,11 @@ public class ImageService {
     private final ThumbNailUtilities thumbNailUtilities;
     private final RequestPageAnalyzer requestPageAnalyzer;
 
-    @Autowired
-    public ImageService(ImageRepository imageRepository, TagRepository tagRepository, ThumbNailUtilities thumbNailUtilities, RequestPageAnalyzer requestPageAnalyzer) {
+    public GlobalImagesController(ImageRepository imageRepository, TagRepository tagRepository, ThumbNailUtilities thumbNailUtilities, RequestPageAnalyzer requestPageAnalyzer) {
         this.imageRepository = imageRepository;
         this.tagRepository = tagRepository;
         this.thumbNailUtilities = thumbNailUtilities;
         this.requestPageAnalyzer = requestPageAnalyzer;
-    }
-
-    public Page<Image> imageList(Integer page) {
-        return imageRepository.findAll(PageRequest.of(0, 20));
     }
 
     public List<Image> getAll() {
@@ -110,26 +97,4 @@ public class ImageService {
         });
         imageRepository.saveAll(images);
     }
-
-    public void analyzeRequestPages() {
-        List<Image> images = requestPageAnalyzer.loginAndDownloadImages();
-        List<Image> all = getAll();
-        images.removeAll(all);
-        saveAll(images);
-    }
-
-
-    public void checkUpdates() {
-        try {
-            List<Image> allImages = getAll();
-            List<Image> images = requestPageAnalyzer.checkUpdates(allImages);
-            images.removeAll(allImages);
-            saveAll(images);
-            createThumbnailsImagesForAllImages();
-        } catch (IOException e) {
-            LoggerFactory.getLogger(this.getClass()).error("Error while cheking update");
-        }
-    }
-
-
 }
