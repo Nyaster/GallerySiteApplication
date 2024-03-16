@@ -13,7 +13,6 @@ import java.util.Objects;
 @Setter
 @Getter
 @Entity
-@Cacheable("tags")
 public class Tag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -14,7 +14,6 @@ import java.util.Objects;
 @Entity
 @Getter
 @Setter
-@Cacheable("fan-images")
 public class FanArtImage implements ThumbnailProvider, ImageProvider {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +24,7 @@ public class FanArtImage implements ThumbnailProvider, ImageProvider {
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationDate;
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "author_id", referencedColumnName = "id")
+    @JoinColumn()
     private Author author;
     private String pathToFileOnDisc;
     private String pathToImageThumbnailOnDisc;

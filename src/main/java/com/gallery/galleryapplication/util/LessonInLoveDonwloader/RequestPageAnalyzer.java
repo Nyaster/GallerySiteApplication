@@ -68,7 +68,6 @@ public class RequestPageAnalyzer {
 
     public void analyzeRequestPages() throws IOException {
         int pageLimit = getPageLimit();
-        pageLimit = 3;
         for (int j = 1; j <= pageLimit; j++) {
             Elements elements = getElements(j);
             List<Image> requestImageModels = null;
@@ -103,7 +102,9 @@ public class RequestPageAnalyzer {
     }
 
     public String downloadImage(String urlE, String mediaId) {
-
+        if(new File(CURRENT_DIRECTORY + File.separator + "image" + File.separator + mediaId + ".png").exists()){
+            return CURRENT_DIRECTORY + File.separator + "image" + File.separator + mediaId + ".png";
+        }
         try {
             WebClient webClient = loginService.getWebClient();
             String url = "https://lessonsinlovegame.com" + urlE;
@@ -149,7 +150,7 @@ public class RequestPageAnalyzer {
         author.setName(authorName);
         String likesString = element.child(3).child(1).ownText();
         int likes = Integer.parseInt(likesString);
-        image.setPathToFileOnDisc(downloadImage(imageUrl, mediaId));
+        image.setPathToFileOnDisc(imageUrl);
         image.setMediaId(Integer.parseInt(mediaId));
         image.setCreationDate(simpleDateFormat.parse(date));
         image.setTags(Tag.createTagsFromList(Stream.of(tags.split(",")).map(x -> x.toLowerCase().trim()).toList()));
@@ -178,7 +179,10 @@ public class RequestPageAnalyzer {
         } catch (IOException e) {
             LoggerFactory.getLogger(getClass()).error("Error in analyzing request pages: " + e.getMessage());
         }
-
+        images.parallelStream().forEach(image-> {
+            String pathToImageThumbnailOnDisc = downloadImage(image.getPathToFileOnDisc(), String.valueOf(image.getMediaId()));
+            image.setPathToImageThumbnailOnDisc(pathToImageThumbnailOnDisc);
+        });
         return images.stream().distinct().collect(Collectors.toList());
     }
 

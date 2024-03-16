@@ -4,10 +4,11 @@ import com.gallery.galleryapplication.models.enums.TagGroup;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
+import java.util.List;
+
 @Setter
-public class TagsDDO {
-    private String value;
-    private TagGroup tagGroup;
-    private int id;
+@Getter
+public class ImageSettings {
+    private Boolean checked;
+    private List<TagsDDO> tags;
 }

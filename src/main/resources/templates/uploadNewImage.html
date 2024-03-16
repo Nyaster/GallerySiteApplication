@@ -51,7 +51,7 @@
     <form id="uploadForm" class="form-control p-5 mt-5">
         <div class="mb-3">
             <label for="fileInput" class="form-label" style="font-weight: 600;">Select Files</label>
-            <input type="file" class="form-control" id="fileInput" name="file">
+            <input type="file" accept="image/*"  class="form-control" id="fileInput" name="file">
         </div>
         <button type="button" class="btn btn-success mt-2" onclick="uploadFiles()">Upload</button>
     </form>
@@ -102,7 +102,7 @@
                 return xhr;
             },
             success: function (response) {
-                window.location.href = "/api/fan-images/"+response+"/edit"
+                window.location.href = "/api/fan-image/"+response+"/edit"
                 $('#progressBarContainer').hide();
             },
             error: function (error) {

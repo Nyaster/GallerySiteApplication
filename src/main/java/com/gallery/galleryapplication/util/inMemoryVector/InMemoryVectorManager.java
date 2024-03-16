@@ -1,5 +1,6 @@
 package com.gallery.galleryapplication.util.inMemoryVector;
 
+import com.gallery.galleryapplication.models.enums.ImageType;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -11,35 +12,46 @@ import java.util.Map;
 @Service
 public class InMemoryVectorManager {
     final private String DBNAME = "vectors.json";
+    final private String ORIGINAL_DBNAME = "imagedb.json";
     private Map<Integer, float[]> vectorDb;
+    private Map<Integer, float[]> normalImageDb;
 
-    public void putIntoVectorIntoDb(Integer id, float[] vector) {
+    public void putIntoVectorIntoDb(Integer id, float[] vector, ImageType imageType) {
         if (vectorDb == null) {
             vectorDb = new HashMap<>();
         }
-        vectorDb.put(id, vector);
+        if (normalImageDb == null) {
+            normalImageDb = new HashMap<>();
+        }
+        switch (imageType){
+            case image -> normalImageDb.put(id,vector);
+            case fanimage -> vectorDb.put(id,vector);
+        }
     }
 
-    public float[] getVectorFromDb(Integer id) {
+    public float[] getVectorFromDb(Integer id, ImageType imageType) {
         if (vectorDb == null) {
             readFromDisk();
         }
-        if (vectorDb.containsKey(id)) {
-            return vectorDb.get(id);
+        if (normalImageDb == null) {
+            readFromDisk();
         }
-        return null;
+        return switch (imageType) {
+            case fanimage -> vectorDb.getOrDefault(id, null);
+            case image -> normalImageDb.getOrDefault(id, null);
+        };
     }
 
     @Scheduled(fixedRate = 600000)
     public void saveDbState() {
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        try {
-//            objectMapper.writeValue(new File("." + File.separator + DBNAME), vectorDb);
-//        } catch (IOException e) {
-//            LoggerFactory.getLogger(this.getClass()).error("Error while trying to save file", e);
-//        }
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("." + File.separator + DBNAME))) {
             oos.writeObject(vectorDb);
+            System.out.println("Map saved successfully.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("." + File.separator + ORIGINAL_DBNAME))) {
+            oos.writeObject(normalImageDb);
             System.out.println("Map saved successfully.");
         } catch (IOException e) {
             e.printStackTrace();
@@ -53,25 +65,13 @@ public class InMemoryVectorManager {
         } catch (IOException | ClassNotFoundException e) {
             LoggerFactory.getLogger(this.getClass()).info("File not found, create new File");
         }
-       /* ObjectMapper objectMapper = new ObjectMapper();
-        Map<Integer, double[]> tempDB = new HashMap<>();
-        File file = new File("." + File.separator + DBNAME);
-        if (file.exists()) {
-            try {
-                String s = Files.readString(file.toPath());
-                Map<String, ArrayList> stringMap = objectMapper.readValue(s, Map.class);
-                stringMap.forEach((key1, value) -> {
-                    int key = Integer.parseInt(key1);
-                    double[] array = new double[value.size()];
-                    for (int i = 0; i < value.size();i++){
-                        array[i] = (double) value.get(i);
-                    }
-                    tempDB.put(key, array);
-                });
-            } catch (IOException e) {
-                LoggerFactory.getLogger(this.getClass()).error("Error while trying to load file", e);
-            }
-        }*/
+        Map<Integer, float[]> normaldb = new HashMap<>();
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("." + File.separator + ORIGINAL_DBNAME))) {
+            normaldb = (Map<Integer, float[]>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            LoggerFactory.getLogger(this.getClass()).info("File not found, create new File");
+        }
+        this.normalImageDb = normaldb;
         this.vectorDb = tempDB;
     }
 

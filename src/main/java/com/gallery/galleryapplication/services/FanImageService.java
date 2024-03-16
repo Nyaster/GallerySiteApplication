@@ -1,7 +1,9 @@
 package com.gallery.galleryapplication.services;
 
+import com.gallery.galleryapplication.models.DDO.ImageSettings;
 import com.gallery.galleryapplication.models.FanArtImage;
 import com.gallery.galleryapplication.models.Tag;
+import com.gallery.galleryapplication.models.enums.ImageType;
 import com.gallery.galleryapplication.repositories.FanArtImageRepository;
 import com.gallery.galleryapplication.repositories.TagRepository;
 import com.gallery.galleryapplication.util.ImageImporter;
@@ -23,19 +25,21 @@ public class FanImageService {
     final private ImageImporter imageImporter;
     final private ThumbNailUtilities thumbNailUtilities;
     final private InMemoryVectorManager inMemoryVectorManager;
+    final private TagService tagService;
 
-    public FanImageService(TagRepository tagRepository, RequestPageAnalyzer requestPageAnalyzer, FanArtImageRepository fanArtImageRepository, ImageImporter imageImporter, ThumbNailUtilities thumbNailUtilities, InMemoryVectorManager inMemoryVectorManager) {
+    public FanImageService(TagRepository tagRepository, RequestPageAnalyzer requestPageAnalyzer, FanArtImageRepository fanArtImageRepository, ImageImporter imageImporter, ThumbNailUtilities thumbNailUtilities, InMemoryVectorManager inMemoryVectorManager, TagService tagService) {
         this.tagRepository = tagRepository;
         this.requestPageAnalyzer = requestPageAnalyzer;
         this.fanArtImageRepository = fanArtImageRepository;
         this.imageImporter = imageImporter;
         this.thumbNailUtilities = thumbNailUtilities;
         this.inMemoryVectorManager = inMemoryVectorManager;
+        this.tagService = tagService;
     }
 
     public void scanImagesFromFolder() {
-        List<FanArtImage> images =requestPageAnalyzer.scanImagesFromFolder();
-        if (!images.isEmpty()){
+        List<FanArtImage> images = requestPageAnalyzer.scanImagesFromFolder();
+        if (!images.isEmpty()) {
             fanArtImageRepository.saveAll(images);
         }
 
@@ -61,16 +65,19 @@ public class FanImageService {
     }
 
     public Optional<FanArtImage> getById(int id) {
-        return fanArtImageRepository.findById(id);
+
+        Optional<FanArtImage> byId = fanArtImageRepository.findById(id);
+        return byId;
     }
 
     public void editImageData(FanArtImage image) {
         fanArtImageRepository.save(image);
     }
+
     public void importImages() {
         List<FanArtImage> images = imageImporter.parseImagesFromImportFolder();
         fanArtImageRepository.saveAll(images);
-        images.forEach(x->inMemoryVectorManager.putIntoVectorIntoDb(x.getId(),x.getEmbedding()));
+        images.forEach(x -> inMemoryVectorManager.putIntoVectorIntoDb(x.getId(), x.getEmbedding(), ImageType.fanimage));
         inMemoryVectorManager.saveDbState();
 
     }
@@ -90,15 +97,28 @@ public class FanImageService {
         HashSet<FanArtImage> entities = new HashSet<>(list);
         fanArtImageRepository.saveAll(entities);
     }
-    public FanArtImage saveFanImage(FanArtImage fanArtImage){
+
+    public FanArtImage saveFanImage(FanArtImage fanArtImage) {
         fanArtImageRepository.save(fanArtImage);
         return fanArtImage;
     }
-    public List<FanArtImage> getImagesWithoutTags(){
+
+    public List<FanArtImage> getImagesWithoutTags() {
         return fanArtImageRepository.findByTagsNullOrTagsEmpty();
     }
 
     public List<FanArtImage> getAll() {
         return fanArtImageRepository.findByIsVisibleTrue();
     }
+    public void changeImageSettings(ImageSettings imageSettings, Integer id) {
+        Optional<FanArtImage> image = getById(id);
+        if(imageSettings.getTags() != null){
+            image.get().setTags(tagService.getTagsFromDDO(imageSettings.getTags()    ));
+        }
+        if (imageSettings.getChecked() != null){
+            image.get().setVisible(imageSettings.getChecked());
+        }
+        editImageData(image.get());
+    }
+
 }

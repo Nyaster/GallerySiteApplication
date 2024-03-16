@@ -1,9 +1,9 @@
 package com.gallery.galleryapplication.Controller;
 
+import com.gallery.galleryapplication.models.enums.ImageType;
 import com.gallery.galleryapplication.services.FanImageService;
 import com.gallery.galleryapplication.services.ImageService;
 import com.gallery.galleryapplication.util.ONNXRuntime;
-import com.gallery.galleryapplication.util.inMemoryVector.InMemoryVectorManager;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,21 +42,24 @@ public class AdminController {
                 case "download_images" -> imageService.analyzeRequestPages();
                 case "check_updates" -> imageService.checkUpdates();
                 case "import_images" -> fanImageService.importImages();
-                case "generate_embeddings" -> onnxRuntime.generateEmbeedings(fanImageService.getAll());
+                case "generate_embeddings" -> onnxRuntime.generateEmbeddings(fanImageService.getAll(), ImageType.fanimage);
+                case "generate_embeddings_image" ->onnxRuntime.generateEmbeddings(imageService.getAll(),ImageType.image);
                 case null, default -> {
                     operationInProgress = false;
                     return ResponseEntity.badRequest().body("error");
                 }
             }
+            operationInProgress = false;
             return ResponseEntity.ok("Hi");
         }catch (Exception e){
-            e.printStackTrace();
+            operationInProgress = false;
             LoggerFactory.getLogger(this.getClass()).error("WTF",e);
         }
         finally {
             operationInProgress = false;
             return ResponseEntity.ok("Hi");
         }
+
     }
 
 }

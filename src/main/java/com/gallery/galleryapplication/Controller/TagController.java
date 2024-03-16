@@ -1,10 +1,9 @@
 package com.gallery.galleryapplication.Controller;
 
+import com.gallery.galleryapplication.models.DDO.ImageSettings;
 import com.gallery.galleryapplication.models.DDO.TagsDDO;
 import com.gallery.galleryapplication.models.Tag;
 import com.gallery.galleryapplication.services.TagService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -31,11 +30,11 @@ public class TagController {
     @PostMapping("/api/tags")
     public @ResponseBody List<TagsDDO> getAllTags(){
         return tagService.getAll().parallelStream().map(x->{
-            TagsDDO tagsDDO = new TagsDDO();
-            tagsDDO.setValue(x.getName());
-            tagsDDO.setTagGroup(x.getTagGroup());
-            tagsDDO.setId(x.getId());
-            return tagsDDO;
+            TagsDDO imageSettings = new TagsDDO();
+            imageSettings.setValue(x.getName());
+            imageSettings.setTagGroup(x.getTagGroup());
+            imageSettings.setId(x.getId());
+            return imageSettings;
         }).collect(Collectors.toList());
     }
 

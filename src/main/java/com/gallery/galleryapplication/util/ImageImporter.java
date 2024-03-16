@@ -107,7 +107,7 @@ public class ImageImporter {
     }
 
     public float[] convertJsonNodeArrayToDoubleArray(JsonNode jsonNodes) {
-        if (jsonNodes == null || jsonNodes.size() == 0) {
+        if (jsonNodes == null || jsonNodes.isEmpty()) {
             return new float[0]; // Return empty array if input is null or empty
         }
 

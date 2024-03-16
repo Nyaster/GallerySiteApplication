@@ -16,12 +16,11 @@ import java.util.Objects;
 @Setter
 @Getter
 @Entity
-@Cacheable("images")
 public class Image implements ThumbnailProvider, ImageProvider {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},fetch = FetchType.EAGER)
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},fetch = FetchType.LAZY)
     @JoinTable(
             name = "Image_Tag",
             joinColumns = @JoinColumn(name = "image_id"),
@@ -36,7 +35,7 @@ public class Image implements ThumbnailProvider, ImageProvider {
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationDate;
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "author_id", referencedColumnName = "id")
+    @JoinColumn()
     private Author author;
     private String pathToFileOnDisc;
     @Getter
@@ -46,6 +45,8 @@ public class Image implements ThumbnailProvider, ImageProvider {
     private String tagsInString;
     @Transient
     private float[] embedding;
+    @Transient
+    private Double TemporalCousineSimiliraty;
     @ManyToOne
     @JoinColumn(name = "created_by_id")
     private Person createdBy;
@@ -64,5 +65,10 @@ public class Image implements ThumbnailProvider, ImageProvider {
 
     public String getTagsInString() {
         return getTags().stream().map(Tag::getName).reduce((x, y)->x+", "+y).orElse("");
+    }
+
+    @Override
+    public boolean isVisible() {
+        return true;
     }
 }

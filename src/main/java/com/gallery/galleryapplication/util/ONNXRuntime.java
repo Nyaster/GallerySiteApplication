@@ -4,7 +4,8 @@ import ai.onnxruntime.OnnxTensor;
 import ai.onnxruntime.OrtEnvironment;
 import ai.onnxruntime.OrtException;
 import ai.onnxruntime.OrtSession;
-import com.gallery.galleryapplication.models.FanArtImage;
+import com.gallery.galleryapplication.models.Interfaces.ImageProvider;
+import com.gallery.galleryapplication.models.enums.ImageType;
 import com.gallery.galleryapplication.util.inMemoryVector.InMemoryVectorManager;
 import net.coobird.thumbnailator.Thumbnails;
 import org.slf4j.LoggerFactory;
@@ -14,7 +15,9 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -22,14 +25,14 @@ public class ONNXRuntime {
     public static final int SIZE = 448;
     private final String PATH_TO_MODEL = "./model/model.onnx";
     private final InMemoryVectorManager inMemoryVectorManager;
+    private final int NUMBEROFPOINTS = 3500;
 
     public ONNXRuntime(InMemoryVectorManager inMemoryVectorManager) {
         this.inMemoryVectorManager = inMemoryVectorManager;
     }
 
-    public void generateEmbeedings(List<FanArtImage> all) {
+    public void generateEmbeddings(List<? extends ImageProvider> all, ImageType imageType) {
         OrtEnvironment ortEnvironment = OrtEnvironment.getEnvironment();
-        OrtSession.SessionOptions options = new OrtSession.SessionOptions();
         if (!new File(PATH_TO_MODEL).exists()) {
             LoggerFactory.getLogger(this.getClass()).info("Please add model");
             return;
@@ -37,32 +40,38 @@ public class ONNXRuntime {
 
         try {
             OrtSession session = ortEnvironment.createSession(PATH_TO_MODEL);
-            all.stream().filter(y -> inMemoryVectorManager.getVectorFromDb(y.getId()) == null).forEach(x -> {
-                inMemoryVectorManager.putIntoVectorIntoDb(x.getId(), evaluateEmbedding(x, ortEnvironment, session));
+            all.stream().filter(y -> inMemoryVectorManager.getVectorFromDb(y.getMediaId(), imageType) == null).sorted(Comparator.comparing(ImageProvider::getCreationDate).reversed()).limit(400).forEach(x -> {
+                float[] vector = evaluateEmbedding(x, ortEnvironment, session);
+                float[] floats = Arrays.copyOf(vector, NUMBEROFPOINTS);
+                inMemoryVectorManager.putIntoVectorIntoDb(x.getMediaId(), floats, imageType);
             });
             inMemoryVectorManager.saveDbState();
             session.close();
+            ortEnvironment.close();
         } catch (OrtException e) {
             throw new RuntimeException(e);
         }
 
     }
 
-    private float[] evaluateEmbedding(FanArtImage image, OrtEnvironment ortEnvironment, OrtSession session) {
+    private float[] evaluateEmbedding(ImageProvider image, OrtEnvironment ortEnvironment, OrtSession session) {
         float[] output = new float[0];
         try {
             BufferedImage imageToData = resizeImage(image);
             float[][][][] toModelFormatImage = getToModelFormatImage(imageToData);
-            OrtSession.Result result = session.run(Collections.singletonMap("input", OnnxTensor.createTensor(ortEnvironment, toModelFormatImage)));
+            OnnxTensor tensor = OnnxTensor.createTensor(ortEnvironment, toModelFormatImage);
+            OrtSession.Result result = session.run(Collections.singletonMap("input", tensor));
             float[][] outputScores = (float[][]) result.get(0).getValue();
+            result.close();
+            tensor.close();
             return outputScores[0];
         } catch (IOException | OrtException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private BufferedImage resizeImage(FanArtImage image) throws IOException {
-        BufferedImage resizedImg = Thumbnails.of(new File(image.getPathToFileOnDisc())) .size(SIZE, SIZE).keepAspectRatio(true).asBufferedImage();
+    private BufferedImage resizeImage(ImageProvider image) throws IOException {
+        BufferedImage resizedImg = Thumbnails.of(new File(image.getPathToFileOnDisc())).size(SIZE, SIZE).keepAspectRatio(true).asBufferedImage();
         BufferedImage finalImage = new BufferedImage(SIZE, SIZE, BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics = finalImage.createGraphics();
         graphics.setColor(Color.white);

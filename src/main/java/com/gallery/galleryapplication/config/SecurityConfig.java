@@ -37,7 +37,7 @@ public class SecurityConfig {
     @Bean
     static RoleHierarchy roleHierarchy() {
         RoleHierarchyImpl hierarchy = new RoleHierarchyImpl();
-        hierarchy.setHierarchy("ROLE_ADMIN > ROLE_EDITOR\n" + "ROLE_EDITOR > ROLE_USER\n");
+        hierarchy.setHierarchy("ROLE_ADMIN > ROLE_UPLOADER\n" + "ROLE_UPLOADER > ROLE_USER\n");
         return hierarchy;
     }
 
@@ -54,8 +54,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authz) -> authz.requestMatchers("/favicons/**")
                         .permitAll().requestMatchers("/admin/**")
                         .hasRole("ADMIN")
-                        .requestMatchers("api/*/*/edit")
-                        .hasRole("EDITOR")
+                        .requestMatchers("api/*/*/edit","fan-images/upload")
+                        .hasAnyRole("UPLOADER")
                         .requestMatchers("/auth/**", "/styles/**")
                         .permitAll()
                         .anyRequest()

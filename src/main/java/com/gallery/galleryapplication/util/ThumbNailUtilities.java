@@ -1,5 +1,7 @@
 package com.gallery.galleryapplication.util;
 
+import com.gallery.galleryapplication.models.Image;
+import com.gallery.galleryapplication.models.Interfaces.ImageProvider;
 import com.gallery.galleryapplication.models.Interfaces.ThumbnailProvider;
 import net.coobird.thumbnailator.Thumbnails;
 import org.slf4j.LoggerFactory;
@@ -26,9 +28,10 @@ public class ThumbNailUtilities {
         if (!folder.exists()) {
             folder.mkdir();
         }
+        String outputFormat = "jpg";
         File tempFile = new File(placeToSave);
-        Thumbnails.of(Path.of(image.getPathToFileOnDisc()).toFile()).size(width, height).outputFormat("webp").outputQuality(1f).toFile(tempFile);
-        return placeToSave;
+        Thumbnails.of(Path.of(image.getPathToFileOnDisc()).toFile()).size(width, height).outputFormat(outputFormat).outputQuality(1f).toFile(tempFile);
+        return tempFile.getCanonicalPath()+"."+outputFormat;
     }
     public List<?extends ThumbnailProvider> createThumbnailsAndUpdateImage(List<? extends ThumbnailProvider> thumbnailProviders){
         thumbnailProviders.parallelStream().forEach(x-> {
@@ -41,5 +44,15 @@ public class ThumbNailUtilities {
             }
         });
         return thumbnailProviders;
+    }
+
+    public String createThumbnailAndUpdateImage(ThumbnailProvider image) {
+        String thumbnailAndUpdateImage = null;
+        try {
+            thumbnailAndUpdateImage = createThumbnailAndUpdateImage(image, WIDTH, HEIGHT);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return thumbnailAndUpdateImage;
     }
 }
