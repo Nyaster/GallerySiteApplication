@@ -3,7 +3,7 @@ FROM maven as build
 WORKDIR /app
 
 COPY pom.xml ./
-RUN mvn depedency:go-offline -B
+RUN mvn dependency:go-offline -B
 
 COPY src ./src
 COPY model ./model

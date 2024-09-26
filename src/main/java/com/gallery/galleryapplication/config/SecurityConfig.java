@@ -17,8 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
-import org.springframework.security.web.firewall.HttpFirewall;
-import org.springframework.security.web.firewall.StrictHttpFirewall;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -29,8 +27,6 @@ public class SecurityConfig {
     private final String MY_KEY = "TemporaryKey";
     @Value("${server.http.port}")
     private int httpPort;
-    @Value("${server.port}")
-    private int SSLport;
 
     public SecurityConfig(PersonDetailService personDetailService) {
         this.personDetailService = personDetailService;
@@ -46,7 +42,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, RememberMeServices services, CustomAuthenteficationSuccesHandler customAuthenteficationSuccesHandler) throws Exception {
         //.requiresChannel(x->x.anyRequest().requiresSecure()) добавить что бы редирект
-        http.portMapper(x -> x.http(httpPort).mapsTo(SSLport))
+        http
 
                 .authorizeHttpRequests((authz) -> authz.requestMatchers("/favicons/**")
                         .permitAll().requestMatchers("/admin/**")
@@ -88,12 +84,4 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public WebServerFactoryCustomizer<TomcatServletWebServerFactory> cookieProcessorCustomizer() {
-        return (TomcatServletWebServerFactory factory) -> {
-            final Connector connector = new Connector();
-            connector.setPort(httpPort);
-            factory.addAdditionalTomcatConnectors(connector);
-        };
-    }
 }
