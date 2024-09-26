@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +45,7 @@ public class PageService {
         model.addAttribute("currentPage", images.getNumber() + 1);
         model.addAttribute("totalItems", images.getTotalElements());
         model.addAttribute("totalPages", images.getTotalPages());
+        model.addAttribute("keyword",tagsToSearch);
         model.addAttribute("pageSize", PAGE_SIZE);
     }
 
@@ -111,6 +113,9 @@ public class PageService {
         };
         float[] imageEmbedding = (inMemoryVectorManager.getVectorFromDb(image.getMediaId(), imageType));
         all.remove(image);
+        if (imageEmbedding == null){
+            return new ArrayList<>();
+        }
         List<? extends ImageProvider> nearImages = all.parallelStream().map((fanImage -> {
             float[] vectorFromDb = inMemoryVectorManager.getVectorFromDb(fanImage.getMediaId(), imageType);
             if (vectorFromDb != null) {

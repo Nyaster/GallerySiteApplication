@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.gallery</groupId>
-    <artifactId>GalleryApplication</artifactId>
+    <artifactId>galleryapplication</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>GalleryApplication</name>
     <description>GalleryApplication</description>

@@ -1,10 +1,8 @@
 package com.gallery.galleryapplication.util.LessonInLoveDonwloader;
 
 import com.gallery.galleryapplication.models.Author;
-import com.gallery.galleryapplication.models.FanArtImage;
 import com.gallery.galleryapplication.models.Image;
 import com.gallery.galleryapplication.models.Tag;
-import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import org.htmlunit.WebClient;
 import org.htmlunit.html.HtmlPage;
@@ -25,8 +23,6 @@ import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -52,9 +48,9 @@ public class RequestPageAnalyzer {
     }
 
     private int getPageLimit() throws IOException {
-        HtmlPage numberPagesNeedet = loginService.getWebClient().getPage(requestLink + 1);
-        Document numberPagesNeedet1 = Jsoup.parse(numberPagesNeedet.asXml());
-        String value = numberPagesNeedet1.select("div.container > div.message").first().ownText();
+        HtmlPage forCountingPages = loginService.getWebClient().getPage(requestLink + 1);
+        Document parseToDocument = Jsoup.parse(forCountingPages.asXml());
+        String value = parseToDocument.select("div.container > div.message").first().ownText();
         int rowImagesCount = getIntegerValueFromString(value);
         int pageLimit;
         if ((rowImagesCount / 20.0) != (int) (rowImagesCount / 20.0)) {
@@ -102,7 +98,7 @@ public class RequestPageAnalyzer {
     }
 
     public String downloadImage(String urlE, String mediaId) {
-        if(new File(CURRENT_DIRECTORY + File.separator + "image" + File.separator + mediaId + ".png").exists()){
+        if (new File(CURRENT_DIRECTORY + File.separator + "image" + File.separator + mediaId + ".png").exists()) {
             return CURRENT_DIRECTORY + File.separator + "image" + File.separator + mediaId + ".png";
         }
         try {
@@ -140,8 +136,6 @@ public class RequestPageAnalyzer {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
         String date = element.child(0).ownText();
         String tags = element.child(1).ownText();
-
-
         if (tags.equalsIgnoreCase("None yet")) {
             return null;
         }
@@ -150,7 +144,7 @@ public class RequestPageAnalyzer {
         author.setName(authorName);
         String likesString = element.child(3).child(1).ownText();
         int likes = Integer.parseInt(likesString);
-        image.setPathToFileOnDisc(imageUrl);
+        image.setPathToFileOnDisc(this.downloadImage(imageUrl,mediaId));
         image.setMediaId(Integer.parseInt(mediaId));
         image.setCreationDate(simpleDateFormat.parse(date));
         image.setTags(Tag.createTagsFromList(Stream.of(tags.split(",")).map(x -> x.toLowerCase().trim()).toList()));
@@ -179,24 +173,9 @@ public class RequestPageAnalyzer {
         } catch (IOException e) {
             LoggerFactory.getLogger(getClass()).error("Error in analyzing request pages: " + e.getMessage());
         }
-        images.parallelStream().forEach(image-> {
-            String pathToImageThumbnailOnDisc = downloadImage(image.getPathToFileOnDisc(), String.valueOf(image.getMediaId()));
-            image.setPathToImageThumbnailOnDisc(pathToImageThumbnailOnDisc);
-        });
         return images.stream().distinct().collect(Collectors.toList());
     }
 
-
-    @PostConstruct
-    public void onStartUp() {
-      /*  try {
-            this.loginAndDownloadImages();
-        } catch (RuntimeException e) {
-            System.out.println(e.getMessage());
-            LoggerFactory.getLogger(this.getClass())
-                    .info("All post start up tasks done");
-        }*/
-    }
 
     public List<Image> checkUpdates(List<Image> allImages) throws IOException {
         List<Image> globalNewImages = new ArrayList<>();
@@ -226,40 +205,5 @@ public class RequestPageAnalyzer {
         return globalNewImages;
     }
 
-    public List<FanArtImage> scanImagesFromFolder() {
-        File imageFolder = new File(CURRENT_DIRECTORY + File.separator + "imageFanArts");
-        List<FanArtImage> fanArtImages = new ArrayList<>();
-        if (imageFolder.exists() && imageFolder.isDirectory()) {
-            List<File> images = Arrays.stream(imageFolder.listFiles()).toList();
-            fanArtImages = images.parallelStream().map(x -> {
-                FanArtImage fanArtImage = new FanArtImage();
-                fanArtImage.setPathToFileOnDisc(x.getPath());
-                fanArtImage.setCreationDate(extractTimestampFromFilePath(fanArtImage.getPathToFileOnDisc()));
-                return fanArtImage;
-            }).toList();
-        }
-        return fanArtImages;
-    }
 
-    private Date extractTimestampFromFilePath(String filePath) {
-        // Регулярное выражение для поиска даты и времени в формате "yyyy-MM-dd_HH-mm-ss"
-        String regex = "(\\d{4}-\\d{2}-\\d{2})_(\\d{2}-\\d{2}-\\d{2})";
-        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regex);
-        java.util.regex.Matcher matcher = pattern.matcher(filePath);
-
-        if (matcher.find()) {
-            String datePart = matcher.group(1);
-            String timePart = matcher.group(2);
-
-            String dateTimeString = datePart + "_" + timePart;
-
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-            try {
-                return dateFormat.parse(dateTimeString);
-            } catch (ParseException e) {
-                LoggerFactory.getLogger(this.getClass()).error("Error while trying parse a date", e);
-            }
-        }
-        return null;
-    }
 }

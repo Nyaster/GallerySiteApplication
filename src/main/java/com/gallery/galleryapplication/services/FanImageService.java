@@ -38,10 +38,6 @@ public class FanImageService {
     }
 
     public void scanImagesFromFolder() {
-        List<FanArtImage> images = requestPageAnalyzer.scanImagesFromFolder();
-        if (!images.isEmpty()) {
-            fanArtImageRepository.saveAll(images);
-        }
 
     }
 
